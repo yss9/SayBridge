@@ -1,28 +1,23 @@
-import userApi from "./api/userApi";
-import React, { useEffect, useState } from 'react';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import SignUp from "./pages/SignUp";
+import SignIn from "./pages/SignIn";
+import VideoChat from "./pages/VideoChat";
+import Course from "./pages/Course";
 
-function App() {
-    const [data, setData] = useState(''); // 상태로 문자열 관리
-
-    // API 호출
-    useEffect(() => {
-        userApi
-            .getUsers() // userApi에서 데이터를 가져오는 함수 호출
-            .then((response) => {
-                setData(response.data); // API 응답 데이터를 상태에 저장
-                console.log(response.data)
-            })
-            .catch((error) => {
-                console.error('Error fetching data:', error);
-            });
-    }, []); // 컴포넌트 마운트 시 한 번 실행
-
-
+const App = () => {
     return (
-    <div>
-      <h1>테스트 : {data}</h1>
-    </div>
-  );
-}
+        <Router>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/videochat" element={<VideoChat />} />
+                <Route path="/course" element={<Course />} />
+            </Routes>
+        </Router>
+    );
+};
 
 export default App;
