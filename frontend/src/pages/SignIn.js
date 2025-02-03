@@ -1,182 +1,245 @@
 import React from 'react';
 import styled from 'styled-components';
-import Footer from '../component/Footer';
 import Header from '../component/Header';
+import Footer from '../component/Footer';
 
-const Container = styled.div`
+const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
     font-family: Arial, sans-serif;
     overflow: hidden;
 `;
 
-const Main = styled.main`
-    flex: 1 1 auto;
+const MainSection = styled.main`
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 5%;
+    padding: 2rem;
     background-color: #f9f9f9;
-    overflow: hidden;
 `;
 
 const ContentWrapper = styled.div`
     display: flex;
-    gap: 5%;
-    max-width: 80%;
-    width: 100%;
+    width: 90%;
+    gap: 2rem;
+    @media (max-width: 850px) {
+        flex-direction: column;
+    }
 `;
 
-const ImageContainer = styled.div`
+const LeftContainer = styled.div`
+    width: 50%;
+    position: relative;
+    overflow: hidden;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    @media (max-width: 850px) {
+        width: 100%;
+        height: 250px;
+        border-radius: 8px;
+    }
+`;
+
+const StyledImage = styled.img`
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+`;
+
+const RightContainer = styled.div`
+    width: 50%;
+    background: #fff;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    @media (max-width: 850px) {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+`;
+
+const FormTitle = styled.h2`
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+`;
+
+const FormGroup = styled.div`
+    margin-bottom: 1rem;
+`;
+
+const Label = styled.label`
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    font-size: 1.1rem;
+`;
+
+const Input = styled.input`
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+`;
+
+const ButtonGroup = styled.div`
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+`;
+
+const Button = styled.button`
     flex: 1;
-    background-image: url('/image/SignUpImage.jpg'); /* Replace with the correct path */
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+`;
+
+const ForgotButton = styled(Button)`
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #ddd;
+    &:hover {
+        background-color: #f0f0f0;
+    }
+`;
+
+const LoginButton = styled(Button)`
+    background-color: #000;
+    color: #fff;
+    &:hover {
+        background-color: #333;
+    }
+`;
+
+const SignupButton = styled(Button)`
+    width: 100%;
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #ddd;
+    margin-top: 1rem;
+    &:hover {
+        background-color: #f0f0f0;
+    }
+`;
+
+const SocialLoginContainer = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 1.5rem;
+    justify-content: center;
+    & > button {
+        flex: 0 0 calc((100% - 20px) / 3);
+        max-width: calc((100% - 20px) / 3);
+    }
+    @media (max-width: 600px) {
+        & > button {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+`;
+
+const SocialButton = styled.button`
+    height: 50px;
+    border: none;
+    cursor: pointer;
     background-size: cover;
     background-position: center;
-    border-radius: 2%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-repeat: no-repeat;
+    border-radius: 5px;
+    flex-shrink: 0;
 `;
 
-const LoginForm = styled.div`
-    flex: 1;
-    background: white;
-    padding: 5%;
-    border-radius: 2%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    max-width: 50%;
-    width: 100%;
+const NaverButton = styled(SocialButton)`
+    background-image: url(${process.env.PUBLIC_URL + '/image/NaverLoginBtn.png'});
+`;
 
-    h2 {
-        font-size: 1.8rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
-    }
+const GoogleButton = styled(SocialButton)`
+    background-image: url(${process.env.PUBLIC_URL + '/image/GoogleLoginBtn.png'});
+`;
 
-    p {
-        margin-bottom: 2rem;
-        color: #555;
-    }
-
-    label {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-    }
-
-    input {
-        width: 100%;
-        padding: 0.75rem;
-        margin-bottom: 1.5rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-
-    .button-row {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-
-        button {
-            flex: 1;
-            padding: 0.75rem;
-            font-size: 1rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .forgot-button {
-            background: white;
-            color: black;
-            border: 1px solid #ddd;
-
-            &:hover {
-                background: #f0f0f0;
-            }
-        }
-
-        .login-button {
-            background: black;
-            color: white;
-
-            &:hover {
-                background: #333;
-            }
-        }
-    }
-
-    .signup-button {
-        width: 100%;
-        background: white;
-        color: black;
-        border: 1px solid #ddd;
-        padding: 0.75rem;
-        font-size: 1rem;
-        font-weight: bold;
-        border-radius: 4px;
-        cursor: pointer;
-
-        &:hover {
-            background: #f0f0f0;
-        }
-    }
-
-    .social-login {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 1rem;
-
-        button {
-            flex: 1;
-            padding: 0.75rem;
-            margin: 0 0.25rem;
-            background: white;
-            color: black;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-
-            &:hover {
-                background: #f0f0f0;
-            }
-        }
-    }
+const KakaoButton = styled(SocialButton)`
+    background-image: url(${process.env.PUBLIC_URL + '/image/KakaoLoginBtn.png'});
 `;
 
 const SignInPage = () => {
+    const handleNaverLogin = () => {
+        window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+    };
+
+    const handleKakaoLogin = () => {
+        window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
+    };
+
+    const handleGoogleLogin = () => {
+        window.location.href = "http://localhost:8080/oauth2/authorization/google";
+    };
+
+    const handleLoginSubmit = (e) => {
+        e.preventDefault();
+    };
+
+    const handleSignUp = (e) => {
+        e.preventDefault();
+    };
+
     return (
-        <Container>
+        <PageContainer>
             <Header />
-            <Main>
+            <MainSection>
                 <ContentWrapper>
-                    <ImageContainer />
-                    <LoginForm>
-                        <h2>Login</h2>
-                        <p>Please login to access your account</p>
-                        <label>Email</label>
-                        <input type="email" placeholder="Enter your email" required />
-
-                        <label>Password</label>
-                        <input type="password" placeholder="Enter your password" required />
-
-                        <div className="button-row">
-                            <button className="forgot-button">Forgot Password?</button>
-                            <button className="login-button">Login</button>
-                        </div>
-
-                        <button className="signup-button">Sign Up</button>
-
-                        <div className="social-login">
-                            <button>네이버 로그인</button>
-                            <button>구글 로그인</button>
-                            <button>카카오 로그인</button>
-                        </div>
-                    </LoginForm>
+                    <LeftContainer>
+                        <StyledImage
+                            src={process.env.PUBLIC_URL + '/image/SignUpImage.jpg'}
+                            alt="Sign Up"
+                        />
+                    </LeftContainer>
+                    <RightContainer>
+                        <form onSubmit={handleLoginSubmit}>
+                            <FormTitle>Login</FormTitle>
+                            <FormGroup>
+                                <Label>Email</Label>
+                                <Input type="email" placeholder="Enter your email" required />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Password</Label>
+                                <Input type="password" placeholder="Enter your password" required />
+                            </FormGroup>
+                            <ButtonGroup>
+                                <ForgotButton type="button">Forgot Password?</ForgotButton>
+                                <LoginButton type="submit">Login</LoginButton>
+                            </ButtonGroup>
+                            <SignupButton type="button" onClick={handleSignUp}>
+                                Sign Up
+                            </SignupButton>
+                        </form>
+                        <SocialLoginContainer>
+                            <NaverButton type="button" onClick={handleNaverLogin} />
+                            <GoogleButton type="button" onClick={handleGoogleLogin} />
+                            <KakaoButton type="button" onClick={handleKakaoLogin} />
+                        </SocialLoginContainer>
+                    </RightContainer>
                 </ContentWrapper>
-            </Main>
+            </MainSection>
             <Footer />
-        </Container>
+        </PageContainer>
     );
 };
 

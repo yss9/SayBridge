@@ -11,4 +11,10 @@ public class ApiTestController {
         return "good";
     }
 
+
+    @GetMapping("/oauth2/success")
+    public String success() {
+        return "OAuth2 login successful!";
+    }
+
 }

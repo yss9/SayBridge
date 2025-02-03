@@ -1,227 +1,370 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import Footer from '../component/Footer';
+import { userApi, checkApi } from '../api/userApi'; // 실제 API 모듈 경로로 수정하세요.
 import Header from '../component/Header';
+import Footer from '../component/Footer';
+
 
 const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: sans-serif;
 `;
 
 const Main = styled.main`
-    flex: 1 1 auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 5%;
-    background-color: #f9f9f9;
-    overflow: hidden;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 20px;
 `;
 
 const ContentWrapper = styled.div`
-    display: flex;
-    gap: 5%;
-    max-width: 80%;
-    width: 100%;
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  gap: 20px;
 `;
 
-const Form = styled.form`
-    background: white;
-    padding: 5%;
-    border-radius: 2%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    max-width: 50%;
-    width: 100%;
-
-    h2 {
-        margin-bottom: 5%;
-        font-size: 150%;
-        text-align: center;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 2%;
-        font-weight: bold;
-    }
-
-    input {
-        width: 100%;
-        padding: 2%;
-        margin-bottom: 5%;
-        border: 1px solid #ddd;
-        border-radius: 2%;
-        font-size: 100%;
-    }
-
-    button {
-        width: 100%;
-        padding: 3%;
-        font-size: 100%;
-        background: black;
-        color: white;
-        border: none;
-        border-radius: 2%;
-        cursor: pointer;
-
-        &:hover {
-            background: #333;
-        }
-    }
+const FormContainer = styled.div`
+  flex: 1;
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 `;
 
-const CountryContainer = styled.div`
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 5%;
-    justify-content: space-between;
+const FormTitle = styled.h2`
+  text-align: center;
+  margin-bottom: 24px;
 `;
 
-const CountryButton = styled.button`
-    flex: 1 1 calc(25% - 12px);
-    max-width: calc(25% - 12px);
-    padding: 8px;
-    font-size: 0.875rem;
-    font-weight: bold;
-    background-color: ${(props) => (props.isActive ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
-    color: black; /* Black font color */
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.2s, border-color 0.2s;
-
-    &:hover {
-        background-color: rgba(0, 0, 0, 0.1); /* Slightly darker gray on hover */
-        border-color: #ccc;
-    }
-
-    &:active {
-        background-color: rgba(0, 0, 0, 0.2); /* Darker gray on active */
-    }
+const StyledForm = styled.form`
+  display: flex;
+  flex-direction: column;
 `;
+
+const Label = styled.label`
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 14px;
+`;
+
+const StyledInput = styled.input`
+  height: 40px;
+  padding: 0 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+`;
+
+const EmailWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+`;
+
+const EmailInput = styled(StyledInput)`
+  flex: 1;
+  margin-bottom: 0;
+`;
+
+
+const EmailCheckButton = styled.button`
+  height: 40px;
+  padding: 0 12px;
+  font-size: 14px;
+  margin-left: 8px;
+  border: none;
+  border-radius: 4px;
+  background-color: #333;
+  color: #fff;
+  cursor: pointer;
+  &:hover {
+    background-color: #555;
+  }
+`;
+
+
+const ValidationMessage = styled.p`
+  font-size: 12px;
+  margin: 4px 0 12px 0;
+  min-height: 16px;
+  color: ${props => (props.valid ? 'green' : 'red')};
+`;
+
+
+const SubmitButton = styled.button`
+  height: 40px;
+  margin-top: 16px;
+  font-size: 16px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover {
+    background-color: #555;
+  }
+`;
+
 
 const ImageContainer = styled.div`
-    background-image: url('/image/SignUpImage.jpg'); /* public/image/SignUpImage.jpg */
-    background-size: cover; /* 이미지가 컨테이너를 가득 채우도록 설정 */
-    background-position: center; /* 이미지를 가운데로 위치 */
-    border-radius: 2%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    max-width: 50%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 100%;
-    color: #666;
-`;
-
-const DateContainer = styled.div`
-    display: flex;
-    gap: 8px;
-    margin-bottom: 5%;
-`;
-
-const Select = styled.select`
-    flex: 1;
-    padding: 2%;
-    border: 1px solid #ddd;
-    border-radius: 2%;
-    font-size: 100%;
-    cursor: pointer;
+  flex: 1;
+  background-image: url('/image/SignUpImage.jpg'); 
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  min-height: 400px;
 `;
 
 const SignUpPage = () => {
-    const [activeCountry, setActiveCountry] = useState(null);
-    const [birthYear, setBirthYear] = useState('');
-    const [birthMonth, setBirthMonth] = useState('');
-    const [birthDay, setBirthDay] = useState('');
+    const [email, setEmail] = useState('');
+    const [emailValid, setEmailValid] = useState(null);
+    const [emailDupValid, setEmailDupValid] = useState(null);
+    const [emailMessage, setEmailMessage] = useState('');
 
-    const handleCountryClick = (country) => {
-        setActiveCountry(country);
+    const [name, setName] = useState('');
+    const [nameValid, setNameValid] = useState(null);
+    const [nameMessage, setNameMessage] = useState('');
+
+    const [nickname, setNickname] = useState('');
+    const [nicknameValid, setNicknameValid] = useState(null);
+    const [nicknameMessage, setNicknameMessage] = useState('');
+
+    const [password, setPassword] = useState('');
+    const [passwordValid, setPasswordValid] = useState(null);
+    const [passwordMessage, setPasswordMessage] = useState('');
+
+    const [passwordConfirm, setPasswordConfirm] = useState('');
+    const [passwordConfirmValid, setPasswordConfirmValid] = useState(null);
+    const [passwordConfirmMessage, setPasswordConfirmMessage] = useState('');
+
+
+    const handleEmailChange = (e) => {
+        const value = e.target.value;
+        setEmail(value);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!value) {
+            setEmailValid(false);
+            setEmailMessage('이메일을 입력해주세요.');
+        } else if (!emailRegex.test(value)) {
+            setEmailValid(false);
+            setEmailMessage('유효하지 않은 이메일 형식입니다.');
+        } else {
+            setEmailValid(true);
+            setEmailMessage('올바른 이메일 형식입니다.');
+        }
+        setEmailDupValid(null);
     };
 
-    const handleYearChange = (e) => {
-        setBirthYear(e.target.value);
+
+    const handleEmailDupCheck = async () => {
+        if (!emailValid) {
+            alert('유효한 이메일을 입력해주세요.');
+            return;
+        }
+        try {
+            const response = await checkApi.checkEmail(email);
+            // API에서 response.data가 true이면 이미 사용 중인 경우
+            if (response.data === true) {
+                setEmailDupValid(false);
+                setEmailMessage('이미 사용 중인 이메일입니다.');
+            } else {
+                setEmailDupValid(true);
+                setEmailMessage('사용 가능한 이메일입니다.');
+            }
+        } catch (error) {
+            console.error(error);
+            setEmailDupValid(false);
+            setEmailMessage('이메일 중복 확인 중 오류가 발생했습니다.');
+        }
     };
 
-    const handleMonthChange = (e) => {
-        setBirthMonth(e.target.value);
+
+    const handleNameChange = (e) => {
+        const value = e.target.value;
+        setName(value);
+        if (!value.trim()) {
+            setNameValid(false);
+            setNameMessage('이름을 입력해주세요.');
+        } else {
+            setNameValid(true);
+            setNameMessage('올바른 이름입니다.');
+        }
     };
 
-    const handleDayChange = (e) => {
-        setBirthDay(e.target.value);
+
+    const handleNicknameChange = (e) => {
+        const value = e.target.value;
+        setNickname(value);
+        if (!value.trim()) {
+            setNicknameValid(false);
+            setNicknameMessage('닉네임을 입력해주세요.');
+        } else {
+            setNicknameValid(true);
+            setNicknameMessage('올바른 닉네임입니다.');
+        }
     };
 
-    const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
-    const months = Array.from({ length: 12 }, (_, i) => i + 1);
-    const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+    const handlePasswordChange = (e) => {
+        const value = e.target.value;
+        setPassword(value);
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+        if (!value) {
+            setPasswordValid(false);
+            setPasswordMessage('비밀번호를 입력해주세요.');
+        } else if (!passwordRegex.test(value)) {
+            setPasswordValid(false);
+            setPasswordMessage('비밀번호는 영문, 숫자, 특수문자를 포함한 8자 이상이어야 합니다.');
+        } else {
+            setPasswordValid(true);
+            setPasswordMessage('사용 가능한 비밀번호입니다.');
+        }
+
+        if (passwordConfirm) {
+            if (value === passwordConfirm) {
+                setPasswordConfirmValid(true);
+                setPasswordConfirmMessage('비밀번호가 일치합니다.');
+            } else {
+                setPasswordConfirmValid(false);
+                setPasswordConfirmMessage('비밀번호가 일치하지 않습니다.');
+            }
+        }
+    };
+
+
+    const handlePasswordConfirmChange = (e) => {
+        const value = e.target.value;
+        setPasswordConfirm(value);
+        if (!value) {
+            setPasswordConfirmValid(false);
+            setPasswordConfirmMessage('비밀번호 확인을 입력해주세요.');
+        } else if (value !== password) {
+            setPasswordConfirmValid(false);
+            setPasswordConfirmMessage('비밀번호가 일치하지 않습니다.');
+        } else {
+            setPasswordConfirmValid(true);
+            setPasswordConfirmMessage('비밀번호가 일치합니다.');
+        }
+    };
+
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (
+            !emailValid ||
+            emailDupValid !== true ||
+            !nameValid ||
+            !nicknameValid ||
+            !passwordValid ||
+            !passwordConfirmValid
+        ) {
+            alert('모든 필드를 올바르게 입력해주세요.');
+            return;
+        }
+        const userData = { email, name, nickname, password };
+        try {
+            await userApi.signup(userData);
+            alert('회원가입 성공');
+
+        } catch (error) {
+            console.error(error);
+            alert('회원가입 실패');
+        }
+    };
 
     return (
         <Container>
-            <Header/>
+            <Header />
             <Main>
                 <ContentWrapper>
-                    <Form onSubmit={(e) => e.preventDefault()}>
-                        <h2>Sign Up</h2>
-                        <label>Email</label>
-                        <input type="email" placeholder="Enter your email" required />
+                    <FormContainer>
+                        <FormTitle>Sign Up</FormTitle>
+                        <StyledForm onSubmit={handleSubmit}>
 
-                        <label>Name</label>
-                        <input type="text" placeholder="Enter your name" required />
+                            <Label>Email</Label>
+                            <EmailWrapper>
+                                <EmailInput
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    value={email}
+                                    onChange={handleEmailChange}
+                                    required
+                                />
+                                <EmailCheckButton type="button" onClick={handleEmailDupCheck}>
+                                    중복확인
+                                </EmailCheckButton>
+                            </EmailWrapper>
+                            <ValidationMessage valid={emailValid && emailDupValid}>
+                                {emailMessage}
+                            </ValidationMessage>
 
-                        <label>Birthdate</label>
-                        <DateContainer>
-                            <Select value={birthYear} onChange={handleYearChange} required>
-                                <option value="" disabled>Select Year</option>
-                                {years.map((year) => (
-                                    <option key={year} value={year}>{year}</option>
-                                ))}
-                            </Select>
-                            <Select value={birthMonth} onChange={handleMonthChange} required>
-                                <option value="" disabled>Select Month</option>
-                                {months.map((month) => (
-                                    <option key={month} value={month}>{month}</option>
-                                ))}
-                            </Select>
-                            <Select value={birthDay} onChange={handleDayChange} required>
-                                <option value="" disabled>Select Day</option>
-                                {days.map((day) => (
-                                    <option key={day} value={day}>{day}</option>
-                                ))}
-                            </Select>
-                        </DateContainer>
 
-                        <label>Password</label>
-                        <input type="password" placeholder="Enter your password" required />
+                            <Label>Name</Label>
+                            <StyledInput
+                                type="text"
+                                placeholder="Enter your name"
+                                value={name}
+                                onChange={handleNameChange}
+                                required
+                            />
+                            <ValidationMessage valid={nameValid}>
+                                {nameMessage}
+                            </ValidationMessage>
 
-                        <label>Password Confirm</label>
-                        <input type="password" placeholder="Confirm your password" required />
 
-                        <label>Country</label>
-                        <CountryContainer>
-                            {['USA', 'Canada', 'UK', 'KR'].map((country) => (
-                                <CountryButton
-                                    key={country}
-                                    isActive={activeCountry === country}
-                                    onClick={() => handleCountryClick(country)}
-                                >
-                                    {country}
-                                </CountryButton>
-                            ))}
-                        </CountryContainer>
+                            <Label>Nickname</Label>
+                            <StyledInput
+                                type="text"
+                                placeholder="Enter your nickname"
+                                value={nickname}
+                                onChange={handleNicknameChange}
+                                required
+                            />
+                            <ValidationMessage valid={nicknameValid}>
+                                {nicknameMessage}
+                            </ValidationMessage>
 
-                        <button type="submit">Sign Up</button>
-                    </Form>
-                    <ImageContainer/>
+
+                            <Label>Password</Label>
+                            <StyledInput
+                                type="password"
+                                placeholder="Enter your password"
+                                value={password}
+                                onChange={handlePasswordChange}
+                                required
+                            />
+                            <ValidationMessage valid={passwordValid}>
+                                {passwordMessage}
+                            </ValidationMessage>
+
+
+                            <Label>Password Confirm</Label>
+                            <StyledInput
+                                type="password"
+                                placeholder="Confirm your password"
+                                value={passwordConfirm}
+                                onChange={handlePasswordConfirmChange}
+                                required
+                            />
+                            <ValidationMessage valid={passwordConfirmValid}>
+                                {passwordConfirmMessage}
+                            </ValidationMessage>
+
+                            <SubmitButton type="submit">Sign Up</SubmitButton>
+                        </StyledForm>
+                    </FormContainer>
+                    <ImageContainer />
                 </ContentWrapper>
             </Main>
-            <Footer/>
+            <Footer />
         </Container>
     );
 };
