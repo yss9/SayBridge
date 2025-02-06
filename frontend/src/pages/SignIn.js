@@ -1,7 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
+import {useNavigate} from "react-router-dom";
+import {authApi} from "../api/authApi";
 
 const PageContainer = styled.div`
     display: flex;
@@ -180,6 +182,11 @@ const KakaoButton = styled(SocialButton)`
 `;
 
 const SignInPage = () => {
+
+    const navigate = useNavigate();
+    const [email, setEmail] =useState('');
+    const [password, setPassword] = useState('');
+
     const handleNaverLogin = () => {
         window.location.href = "http://localhost:8080/oauth2/authorization/naver";
     };
@@ -192,13 +199,31 @@ const SignInPage = () => {
         window.location.href = "http://localhost:8080/oauth2/authorization/google";
     };
 
-    const handleLoginSubmit = (e) => {
+    const handleLoginSubmit = async (e) => {
         e.preventDefault();
+        const userData = {email, password};
+        try {
+            await authApi.login(userData);
+            alert('회원가입 성공');
+            navigate('/')
+
+        } catch (error) {
+            console.error(error);
+            alert('회원정보가 일치하지 않습니다.');
+        }
     };
 
     const handleSignUp = (e) => {
-        e.preventDefault();
+        navigate('/signup')
     };
+
+    const onEmailHandle = (e) =>{
+        setEmail(e.currentTarget.value);
+    }
+
+    const onPasswordHandle = (e) =>{
+        setPassword(e.currentTarget.value);
+    }
 
     return (
         <PageContainer>
@@ -216,11 +241,11 @@ const SignInPage = () => {
                             <FormTitle>Login</FormTitle>
                             <FormGroup>
                                 <Label>Email</Label>
-                                <Input type="email" placeholder="Enter your email" required />
+                                <Input type="email" placeholder="Enter your email" onChange={onEmailHandle} value={email} required />
                             </FormGroup>
                             <FormGroup>
                                 <Label>Password</Label>
-                                <Input type="password" placeholder="Enter your password" required />
+                                <Input type="password" placeholder="Enter your password" onChange={onPasswordHandle} value={password} required />
                             </FormGroup>
                             <ButtonGroup>
                                 <ForgotButton type="button">Forgot Password?</ForgotButton>

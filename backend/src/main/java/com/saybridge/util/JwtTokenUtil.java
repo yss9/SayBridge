@@ -8,19 +8,28 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
 public class JwtTokenUtil {
 
-    @Value("${jwt.secret}")
-    private String SECRET_KEY;
+    private final Key SIGNING_KEY;
+
     @Value("${jwt.expiration-time}")
-    private String VALIDITY_IN_MS;
+    private long VALIDITY_IN_MS;
+
+    public JwtTokenUtil(@Value("${jwt.secret}") String secretKey) {
+        byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+        this.SIGNING_KEY = Keys.hmacShaKeyFor(keyBytes);
+    }
 
     public String createToken(String subject) {
+        if (subject == null || subject.isEmpty()) {
+            throw new IllegalArgumentException("JWT Subject가 비어 있음");
+        }
+
         Claims claims = Jwts.claims().setSubject(subject);
         Date now = new Date();
         Date validity = new Date(now.getTime() + VALIDITY_IN_MS);
@@ -29,13 +38,13 @@ public class JwtTokenUtil {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+                .signWith(SIGNING_KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String getSubject(String token) {
+    public String extractEmail(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+                .setSigningKey(SIGNING_KEY)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
@@ -45,12 +54,16 @@ public class JwtTokenUtil {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+                    .setSigningKey(SIGNING_KEY)
                     .build()
                     .parseClaimsJws(token);
             return true;
         } catch (JwtException e) {
             return false;
         }
+    }
+
+    public long getValidityInSeconds() {
+        return VALIDITY_IN_MS / 1000;
     }
 }

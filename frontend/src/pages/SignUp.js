@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { userApi, checkApi } from '../api/userApi'; // 실제 API 모듈 경로로 수정하세요.
+import { authApi, checkApi } from '../api/authApi';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
+import { useNavigate } from 'react-router-dom';
 
 
 const Container = styled.div`
@@ -129,7 +130,7 @@ const SignUpPage = () => {
     const [emailDupValid, setEmailDupValid] = useState(null);
     const [emailMessage, setEmailMessage] = useState('');
 
-    const [name, setName] = useState('');
+    const [username, setUsername] = useState('');
     const [nameValid, setNameValid] = useState(null);
     const [nameMessage, setNameMessage] = useState('');
 
@@ -145,6 +146,7 @@ const SignUpPage = () => {
     const [passwordConfirmValid, setPasswordConfirmValid] = useState(null);
     const [passwordConfirmMessage, setPasswordConfirmMessage] = useState('');
 
+    const navigate = useNavigate();
 
     const handleEmailChange = (e) => {
         const value = e.target.value;
@@ -171,7 +173,6 @@ const SignUpPage = () => {
         }
         try {
             const response = await checkApi.checkEmail(email);
-            // API에서 response.data가 true이면 이미 사용 중인 경우
             if (response.data === true) {
                 setEmailDupValid(false);
                 setEmailMessage('이미 사용 중인 이메일입니다.');
@@ -189,7 +190,7 @@ const SignUpPage = () => {
 
     const handleNameChange = (e) => {
         const value = e.target.value;
-        setName(value);
+        setUsername(value);
         if (!value.trim()) {
             setNameValid(false);
             setNameMessage('이름을 입력해주세요.');
@@ -269,10 +270,11 @@ const SignUpPage = () => {
             alert('모든 필드를 올바르게 입력해주세요.');
             return;
         }
-        const userData = { email, name, nickname, password };
+        const userData = { email, username, nickname, password };
         try {
-            await userApi.signup(userData);
+            await authApi.signup(userData);
             alert('회원가입 성공');
+            navigate('/signin')
 
         } catch (error) {
             console.error(error);
@@ -311,7 +313,7 @@ const SignUpPage = () => {
                             <StyledInput
                                 type="text"
                                 placeholder="Enter your name"
-                                value={name}
+                                value={username}
                                 onChange={handleNameChange}
                                 required
                             />

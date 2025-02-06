@@ -1,12 +1,14 @@
 package com.saybridge.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class RegisterRequest {
 
     private String email;
-    private String userName;
+    private String username;
     private String nickname;
     private String password;
 

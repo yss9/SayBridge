@@ -5,21 +5,21 @@ const HeaderContainer = styled.header`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 80px; /* 고정 높이 지정 */
+    height: 80px; 
     padding: 0 8%;
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const Logo = styled.div`
-    font-size: 1.5rem; /* 약 150% */
+    font-size: 1.5rem;
     font-weight: bold;
     color: #333;
 `;
 
 const Nav = styled.nav`
     display: flex;
-    gap: 2rem; /* rem 단위로 간격 지정 */
+    gap: 2rem;
     align-items: center;
 
     a {
