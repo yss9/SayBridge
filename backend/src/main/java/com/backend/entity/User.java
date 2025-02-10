@@ -34,11 +34,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AuthProvider provider;
 
-    private LocalDateTime lastLoginTime;
-
     private LocalDateTime createdAt;
-
-    private String refreshToken;
 
     @PrePersist
     public void prePersist(){

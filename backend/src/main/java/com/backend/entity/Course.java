@@ -31,11 +31,5 @@ public class Course {
     @Column(nullable = false)
     private Integer currentStudents = 0;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-    }
 }

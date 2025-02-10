@@ -38,7 +38,7 @@ public class AuthService {
         user.setUsername(request.getUsername());
         user.setPassword(encodedPassword);
         user.setNickname(request.getNickname());
-        user.setProvider(AuthProvider.LOCAL);
+        user.setProvider(AuthProvider.NONE);
         user.setRole(Role.USER);
 
         userRepository.save(user);
