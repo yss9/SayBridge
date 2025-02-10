@@ -2,7 +2,8 @@ import apiClient from './index';
 
 const authApi = {
     signup: (userData) => apiClient.post('/auth/signup', userData),
-    login: (userData) => apiClient.post('/auth/login', userData, { withCredentials: true })
+    login: (userData) => apiClient.post('/auth/login', userData, { withCredentials: true }),
+    logout: () => apiClient.post('/auth/logout', {},{ withCredentials: true })
 };
 
 const checkApi = {

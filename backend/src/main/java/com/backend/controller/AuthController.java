@@ -51,12 +51,13 @@ public class AuthController {
                 .secure(false)
                 .sameSite("Strict")
                 .path("/")
+                .domain("localhost")
                 .maxAge(0)
                 .build();
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body("로그아웃 성공");
+                .body("로그아웃 완료");
     }
 
     @GetMapping("/email-exists")
