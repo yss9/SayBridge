@@ -5,14 +5,20 @@ import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import VideoChat from "./pages/VideoChat";
 import Course from "./pages/Course";
+import Main from "./pages/Main";
+import MyPage from "./pages/MyPage";
+import TeacherProfile from "./pages/TeacherProfile";
 
 const App = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<Main />} />
+                <Route path="/home" element={<Home />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/signin" element={<SignIn />} />
+                <Route path="/mypage" element={<MyPage />} />
+                <Route path="/teacherprofile" element={<TeacherProfile />}/>
                 <Route path="/videochat" element={<VideoChat />} />
                 <Route path="/course" element={<Course />} />
             </Routes>
