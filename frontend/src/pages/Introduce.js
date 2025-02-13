@@ -14,7 +14,7 @@ const Container = styled.div`
     box-sizing: border-box;
 `;
 
-const Main = styled.main`
+const Introduce = styled.main`
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -352,7 +352,7 @@ const ChartPlaceholder = styled.div`
     }
 `;
 
-const MainPage = () => {
+const IntroducePage = () => {
     const navigate = useNavigate();
 
     const handleGoLogin = () => {
@@ -362,7 +362,7 @@ const MainPage = () => {
     return (
         <Container>
             <Header />
-            <Main>
+            <Introduce>
                 <BannerSection>
                     <BannerContent>
                         <h1>Improve Your English Speaking Skills</h1>
@@ -478,10 +478,10 @@ const MainPage = () => {
                         <p>Speaking Progress Chart</p>
                     </ChartPlaceholder>
                 </PerformanceSection>
-            </Main>
+            </Introduce>
             <Footer />
         </Container>
     );
 };
 
-export default MainPage;
+export default IntroducePage;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
@@ -74,16 +74,9 @@ const ProfileButton = styled.button`
     border-radius: 4px;
     font-size: 14px;
     cursor: pointer;
-`;
-
-const PasswordButton = styled.button`
-    background: #fff;
-    color: #000;
-    padding: 10px 16px;
-    border: 1px solid #000;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
+    &:hover {
+        background: #333;
+    }
 `;
 
 const Main = styled.main`
@@ -145,58 +138,6 @@ const CourseModules = styled.div`
     font-weight: bold;
 `;
 
-const ProfilePictureSection = styled.section`
-    width: 100%;
-    max-width: 1000px;
-    padding: 40px 20px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 40px;
-`;
-
-const PictureInfo = styled.div`
-    flex: 1 1 300px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-`;
-
-const PictureLabel = styled.h2`
-    font-size: 24px;
-    margin: 0;
-`;
-
-const PictureSubtitle = styled.p`
-    font-size: 14px;
-    color: #555;
-    margin: 0;
-`;
-
-const UploadWrapper = styled.div`
-    flex: 1 1 300px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-`;
-
-const UploadLabel = styled.label`
-    font-size: 14px;
-`;
-
-const FileInput = styled.input`
-    font-size: 14px;
-`;
-
-const UploadButton = styled.button`
-    background: #000;
-    color: #fff;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-`;
-
 const ReviewsSection = styled.section`
     width: 100%;
     max-width: 1000px;
@@ -247,11 +188,95 @@ const ReviewRating = styled.div`
 `;
 
 const ReviewText = styled.div`
-  font-size: 14px;
-  color: #333;
+    font-size: 14px;
+    color: #333;
+`;
+
+const ModalOverlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+`;
+
+const ModalContent = styled.div`
+    background: #fff;
+    border-radius: 8px;
+    width: 380px;
+    padding: 24px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+`;
+
+const CloseButton = styled.button`
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    &:hover {
+        color: #888;
+    }
+`;
+
+const ModalTitle = styled.h3`
+    margin: 0;
+    font-size: 20px;
+`;
+
+const ModalFormGroup = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+`;
+
+const Label = styled.label`
+    font-size: 14px;
+    font-weight: bold;
+`;
+
+const Input = styled.input`
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+`;
+
+const SaveButton = styled.button`
+    background: #000;
+    color: #fff;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    align-self: flex-end;
+    cursor: pointer;
+    &:hover {
+        background: #333;
+    }
 `;
 
 const MyPage = () => {
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    const handleOpenEditModal = () => {
+        setIsEditModalOpen(true);
+    };
+
+    const handleCloseEditModal = () => {
+        setIsEditModalOpen(false);
+    };
+
     return (
         <PageContainer>
             <Header />
@@ -266,8 +291,7 @@ const MyPage = () => {
                         </div>
                     </UserInfo>
                     <ButtonGroup>
-                        <PasswordButton>Change Password</PasswordButton>
-                        <ProfileButton>Edit Profile</ProfileButton>
+                        <ProfileButton onClick={handleOpenEditModal}>Edit Profile</ProfileButton>
                     </ButtonGroup>
                 </BannerContent>
             </Banner>
@@ -289,17 +313,6 @@ const MyPage = () => {
                         </CourseCard>
                     </CoursesList>
                 </CoursesSection>
-                <ProfilePictureSection>
-                    <PictureInfo>
-                        <PictureLabel>Change Profile Picture</PictureLabel>
-                        <PictureSubtitle>Upload a new profile picture</PictureSubtitle>
-                    </PictureInfo>
-                    <UploadWrapper>
-                        <UploadLabel>Choose Image</UploadLabel>
-                        <FileInput type="file" />
-                        <UploadButton>Upload</UploadButton>
-                    </UploadWrapper>
-                </ProfilePictureSection>
                 <ReviewsSection>
                     <SectionTitle>User Reviews</SectionTitle>
                     <ReviewsList>
@@ -323,6 +336,28 @@ const MyPage = () => {
                 </ReviewsSection>
             </Main>
             <Footer />
+
+            {isEditModalOpen && (
+                <ModalOverlay onClick={handleCloseEditModal}>
+                    <ModalContent onClick={(e) => e.stopPropagation()}>
+                        <CloseButton onClick={handleCloseEditModal}>×</CloseButton>
+                        <ModalTitle>Edit Profile</ModalTitle>
+                        <ModalFormGroup>
+                            <Label htmlFor="nickname">Nickname</Label>
+                            <Input id="nickname" type="text" placeholder="Enter new nickname" />
+                        </ModalFormGroup>
+                        <ModalFormGroup>
+                            <Label htmlFor="name">Name</Label>
+                            <Input id="name" type="text" placeholder="Enter new name" />
+                        </ModalFormGroup>
+                        <ModalFormGroup>
+                            <Label htmlFor="password">Password</Label>
+                            <Input id="password" type="password" placeholder="Enter new password" />
+                        </ModalFormGroup>
+                        <SaveButton>Save Changes</SaveButton>
+                    </ModalContent>
+                </ModalOverlay>
+            )}
         </PageContainer>
     );
 };

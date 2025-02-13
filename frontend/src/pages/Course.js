@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import Footer from '../component/Footer';
 import Header from '../component/Header';
+import EnrollmentListModal from './EnrollmentListModal';
 
 const Container = styled.div`
     display: flex;
     flex-direction: column;
     height: 100vh;
     font-family: Arial, sans-serif;
-    overflow: hidden;
 `;
 
 const Main = styled.main`
@@ -49,7 +49,7 @@ const ProfileDescription = styled.p`
     font-size: 100%;
 `;
 
-const ViewProfileButton = styled.button`
+const EnrollmentListButton = styled.button`
     padding: 2%;
     background: black;
     color: white;
@@ -94,7 +94,6 @@ const CreatePostButton = styled.button`
     cursor: pointer;
     transition: background-color 0.2s;
     margin: 0 auto 5%;
-
     &:hover {
         background-color: #333;
     }
@@ -157,19 +156,32 @@ const SubmitButton = styled.button`
     }
 `;
 
-const TeacherProfilePostsPage = () => {
+const CoursePage = () => {
+    const [showEnrollmentList, setShowEnrollmentList] = useState(false);
+
+    const handleOpenEnrollmentList = () => {
+        setShowEnrollmentList(true);
+    };
+
+    const handleCloseEnrollmentList = () => {
+        setShowEnrollmentList(false);
+    };
+
     return (
         <Container>
             <Header />
+
             <ProfileSection>
                 <ProfileDetails>
                     <ProfileName>Teacher Kim</ProfileName>
                     <ProfileDescription>Experienced teacher passionate about education</ProfileDescription>
                 </ProfileDetails>
-                <ViewProfileButton>View Profile</ViewProfileButton>
+                <EnrollmentListButton onClick={handleOpenEnrollmentList}>
+                    Enrollment List
+                </EnrollmentListButton>
             </ProfileSection>
-            <Main>
 
+            <Main>
                 <PostsSection>
                     <SectionTitle>Recent Posts</SectionTitle>
                     <SectionSubtitle>Engage with other students and share your thoughts</SectionSubtitle>
@@ -191,9 +203,14 @@ const TeacherProfilePostsPage = () => {
                     ))}
                 </PostsSection>
             </Main>
+
             <Footer />
+
+            {showEnrollmentList && (
+                <EnrollmentListModal onClose={handleCloseEnrollmentList} />
+            )}
         </Container>
     );
 };
 
-export default TeacherProfilePostsPage;
+export default CoursePage;
