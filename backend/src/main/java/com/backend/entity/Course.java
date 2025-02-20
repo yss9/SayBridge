@@ -22,14 +22,30 @@ public class Course {
     @Column(nullable = false, length = 255)
     private String title;
 
+    @Column(nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
+    private CourseLevel level;
+
+    @Column(nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
+    private Language language;
+
     @Column(length = 1000)
     private String description;
 
     @Column(nullable = false)
     private Integer maxStudents;
 
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     @Column(nullable = false)
     private Integer currentStudents = 0;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 
 
 }

@@ -1,6 +1,6 @@
 package com.backend.entity;
 
-public enum LectureLevel {
+public enum CourseLevel {
     BEGINNER,
     INTERMEDIATE,
     ADVANCED

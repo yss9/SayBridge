@@ -14,4 +14,17 @@ const userInfoApi = {
    userInfo:() => apiClient.get('/user/me', { withCredentials:true})
 };
 
-export { authApi, checkApi,userInfoApi };
+const uploadApi = {
+    fileUpload: (file) => {
+        const formData = new FormData();
+        formData.append('file', file); // Spring의 @RequestParam 이름과 일치
+        return apiClient.post('/files/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        withCredentials: true
+        });
+    }
+};
+
+export { authApi, checkApi,userInfoApi, uploadApi };

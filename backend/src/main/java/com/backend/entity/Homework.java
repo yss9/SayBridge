@@ -16,8 +16,8 @@ public class Homework {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "lecture_post_id", nullable = false)
-    private LecturePost lecturePost;
+    @JoinColumn(name = "course_post_id", nullable = false)
+    private CoursePost coursePost;
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)

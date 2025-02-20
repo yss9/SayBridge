@@ -8,6 +8,7 @@ import Course from "./pages/Course";
 import Introduce from "./pages/Introduce";
 import MyPage from "./pages/MyPage";
 import TeacherProfile from "./pages/TeacherProfile";
+import FileUpload from "./pages/FileUpload";
 
 const App = () => {
     return (
@@ -21,6 +22,8 @@ const App = () => {
                 <Route path="/teacherprofile" element={<TeacherProfile />}/>
                 <Route path="/videochat" element={<VideoChat />} />
                 <Route path="/course" element={<Course />} />
+
+                <Route path="/file" element={<FileUpload/>}/>
             </Routes>
         </Router>
     );

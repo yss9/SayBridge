@@ -20,10 +20,11 @@ public class TeacherProfile {
     private User user;
 
     @Column(nullable = false, length = 50)
-    private String language;
+    @Enumerated(EnumType.STRING)
+    private Language language;
 
-    @Column(nullable = false, length = 50)
-    private LectureLevel level;
+    @Column(length = 255)
+    private String description;
 
     @Column(length = 1000)
     private String bio;

@@ -7,6 +7,10 @@ const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
 `;
 
 const Main = styled.main`
@@ -14,9 +18,18 @@ const Main = styled.main`
     background: #fff;
 `;
 
+
+const SectionContent = styled.div`
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;  
+    box-sizing: border-box;
+`;
+
 const RecommendationSection = styled.section`
     width: 100%;
-    padding: 60px 20px;
+    padding: 60px 0; 
     text-align: center;
 `;
 
@@ -71,9 +84,10 @@ const LevelRow = styled.div`
     gap: 12px;
 `;
 
+
 const FilterButton = styled.button`
-    width: 200px;
-    padding: 10px;
+    padding: 10px 20px;
+    width: 150px;
     font-size: 14px;
     background: #f0f0f0;
     border: none;
@@ -81,6 +95,10 @@ const FilterButton = styled.button`
     cursor: pointer;
     &:hover {
         background: #e6e6e6;
+    }
+
+    @media (max-width: 480px) {
+        width: 100%;
     }
 `;
 
@@ -92,8 +110,8 @@ const ActionButtons = styled.div`
 `;
 
 const ClearButton = styled.button`
-    width: 200px;
     padding: 12px 28px;
+    width: 230px;
     background: #fff;
     color: #000;
     font-size: 16px;
@@ -103,13 +121,17 @@ const ClearButton = styled.button`
     &:hover {
         background: #f7f7f7;
     }
+
+    @media (max-width: 480px) {
+        width: 100%;
+    }
 `;
 
 const SubmitButton = styled.button`
-    width: 200px;
     padding: 12px 28px;
     background: #000;
     color: #fff;
+    width: 230px;
     font-size: 16px;
     border: none;
     border-radius: 4px;
@@ -117,25 +139,42 @@ const SubmitButton = styled.button`
     &:hover {
         background: #333;
     }
+
+    @media (max-width: 480px) {
+        width: 100%;
+    }
 `;
 
 const Divider = styled.div`
     width: 100%;
-    max-width: 1200px;
     height: 1px;
     background: #ccc;
-    margin: 24px auto 0 auto;
+    margin-top: 24px;
 `;
 
 const TeacherSection = styled.section`
     width: 100%;
-    padding: 60px 20px;
+    padding: 60px 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center; 
+`;
+
+const TeacherContainer = styled.div`
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    box-sizing: border-box;
-    max-width: 1200px;
-    margin: 0 auto;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
 `;
 
 const TeacherInfo = styled.div`
@@ -180,9 +219,8 @@ const TeacherImage = styled.div`
 
 const CoursesSection = styled.section`
     width: 100%;
-    padding: 40px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 40px 0;
+    box-sizing: border-box;
 `;
 
 const CoursesGrid = styled.div`
@@ -198,7 +236,10 @@ const CourseCard = styled.div`
     border-radius: 6px;
     padding: 16px;
     box-sizing: border-box;
-    min-width: 220px;
+
+    @media (max-width: 480px) {
+        flex: 1 1 100%;
+    }
 `;
 
 const BadgeRow = styled.div`
@@ -228,102 +269,114 @@ const CourseImage = styled.div`
 `;
 
 const CourseTitle = styled.h3`
-  margin: 0 0 4px 0;
-  font-size: 16px;
+    margin: 0 0 4px 0;
+    font-size: 16px;
 `;
 
 const CourseLevel = styled.p`
-  margin: 0;
-  font-size: 14px;
-  color: #666;
+    margin: 0;
+    font-size: 14px;
+    color: #666;
 `;
 
-const RecommendationPage = () => {
+const HomePage = () => {
     return (
         <PageContainer>
             <Header />
             <Main>
                 <RecommendationSection>
-                    <PageTitle>Get a teacher recommendation for you</PageTitle>
+                    <SectionContent>
+                        <PageTitle>Get a course recommendation for you</PageTitle>
 
-                    <FilterArea>
-                        <FilterContainer>
-                            <LeftFilterColumn>
-                                <FilterLabel>Language</FilterLabel>
-                                <LanguageGrid>
-                                    <FilterButton>Korean</FilterButton>
-                                    <FilterButton>English</FilterButton>
-                                    <FilterButton>Japanese</FilterButton>
-                                    <FilterButton>Chinese</FilterButton>
-                                </LanguageGrid>
-                            </LeftFilterColumn>
+                        <FilterArea>
+                            <FilterContainer>
+                                <LeftFilterColumn>
+                                    <FilterLabel>Language</FilterLabel>
+                                    <LanguageGrid>
+                                        <FilterButton>Korean</FilterButton>
+                                        <FilterButton>English</FilterButton>
+                                        <FilterButton>Japanese</FilterButton>
+                                        <FilterButton>Chinese</FilterButton>
+                                        <FilterButton>Spanish</FilterButton>
+                                        <FilterButton>French</FilterButton>
+                                    </LanguageGrid>
+                                </LeftFilterColumn>
 
-                            <RightFilterColumn>
-                                <FilterLabel>Level</FilterLabel>
-                                <LevelRow>
-                                    <FilterButton>Beginner</FilterButton>
-                                    <FilterButton>Intermediate</FilterButton>
-                                    <FilterButton>Advanced</FilterButton>
-                                </LevelRow>
-                            </RightFilterColumn>
-                        </FilterContainer>
+                                <RightFilterColumn>
+                                    <FilterLabel>Level</FilterLabel>
+                                    <LevelRow>
+                                        <FilterButton>Beginner</FilterButton>
+                                        <FilterButton>Intermediate</FilterButton>
+                                        <FilterButton>Advanced</FilterButton>
+                                    </LevelRow>
+                                </RightFilterColumn>
+                            </FilterContainer>
 
-                        <ActionButtons>
-                            <ClearButton>Clear</ClearButton>
-                            <SubmitButton>Submit</SubmitButton>
-                        </ActionButtons>
-                    </FilterArea>
+                            <ActionButtons>
+                                <ClearButton>Clear</ClearButton>
+                                <SubmitButton>Submit</SubmitButton>
+                            </ActionButtons>
+                        </FilterArea>
 
-                    <Divider />
+                        <Divider />
+                    </SectionContent>
                 </RecommendationSection>
 
+                {/* 2) Teacher Section */}
                 <TeacherSection>
-                    <TeacherInfo>
-                        <TeacherName>Elsa</TeacherName>
-                        <TeacherDesc>Explore our popular language learning courses</TeacherDesc>
-                        <ViewAllButton>View All Courses</ViewAllButton>
-                    </TeacherInfo>
-                    <TeacherImage />
+                    <TeacherContainer>
+                        <TeacherInfo>
+                            <TeacherName>Elsa</TeacherName>
+                            <TeacherDesc>Explore our popular language learning courses</TeacherDesc>
+                            <ViewAllButton>View All Courses</ViewAllButton>
+                        </TeacherInfo>
+                        <TeacherImage />
+                    </TeacherContainer>
                 </TeacherSection>
 
+                {/* 3) Courses Section */}
                 <CoursesSection>
-                    <CoursesGrid>
-                        <CourseCard>
-                            <BadgeRow>
-                                <Badge>New</Badge>
-                            </BadgeRow>
-                            <CourseImage>Course Image 1</CourseImage>
-                            <CourseTitle>Korean Conversation</CourseTitle>
-                            <CourseLevel>Intermediate Level</CourseLevel>
-                        </CourseCard>
-                        <CourseCard>
-                            <BadgeRow>
-                                <Badge>Recommended</Badge>
-                            </BadgeRow>
-                            <CourseImage>Course Image 2</CourseImage>
-                            <CourseTitle>Business English</CourseTitle>
-                            <CourseLevel>Advanced Level</CourseLevel>
-                        </CourseCard>
-                        <CourseCard>
-                            <BadgeRow>
-                                <Badge>Popular</Badge>
-                            </BadgeRow>
-                            <CourseImage>Course Image 3</CourseImage>
-                            <CourseTitle>TOPIK Preparation</CourseTitle>
-                            <CourseLevel>Beginner to Advanced</CourseLevel>
-                        </CourseCard>
-                    </CoursesGrid>
+                    <SectionContent>
+                        <CoursesGrid>
+                            <CourseCard>
+                                <BadgeRow>
+                                    <Badge>New</Badge>
+                                </BadgeRow>
+                                <CourseImage>Course Image 1</CourseImage>
+                                <CourseTitle>Korean Conversation</CourseTitle>
+                                <CourseLevel>Intermediate Level</CourseLevel>
+                            </CourseCard>
 
-                    <CoursesGrid style={{ marginTop: '20px' }}>
-                        <CourseCard style={{ flex: '1 1 100%' }}>
-                            <BadgeRow>
-                                <Badge>Updated</Badge>
-                            </BadgeRow>
-                            <CourseImage>Course Image 4</CourseImage>
-                            <CourseTitle>English Pronunciation</CourseTitle>
-                            <CourseLevel>All Levels</CourseLevel>
-                        </CourseCard>
-                    </CoursesGrid>
+                            <CourseCard>
+                                <BadgeRow>
+                                    <Badge>Recommended</Badge>
+                                </BadgeRow>
+                                <CourseImage>Course Image 2</CourseImage>
+                                <CourseTitle>Business English</CourseTitle>
+                                <CourseLevel>Advanced Level</CourseLevel>
+                            </CourseCard>
+
+                            <CourseCard>
+                                <BadgeRow>
+                                    <Badge>Popular</Badge>
+                                </BadgeRow>
+                                <CourseImage>Course Image 3</CourseImage>
+                                <CourseTitle>TOPIK Preparation</CourseTitle>
+                                <CourseLevel>Beginner to Advanced</CourseLevel>
+                            </CourseCard>
+                        </CoursesGrid>
+
+                        <CoursesGrid style={{ marginTop: '20px' }}>
+                            <CourseCard style={{ flex: '1 1 100%' }}>
+                                <BadgeRow>
+                                    <Badge>Updated</Badge>
+                                </BadgeRow>
+                                <CourseImage>Course Image 4</CourseImage>
+                                <CourseTitle>English Pronunciation</CourseTitle>
+                                <CourseLevel>All Levels</CourseLevel>
+                            </CourseCard>
+                        </CoursesGrid>
+                    </SectionContent>
                 </CoursesSection>
             </Main>
             <Footer />
@@ -331,4 +384,4 @@ const RecommendationPage = () => {
     );
 };
 
-export default RecommendationPage;
+export default HomePage;
