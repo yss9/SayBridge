@@ -12,11 +12,23 @@ import lombok.Setter;
 public class CourseDto {
 
     private Long id;
-    private String teacherId;
+    private Long teacherId;
     private String title;
     private String description;
     private Integer maxStudents;
     private Language language;
     private CourseLevel level;
+
+
+    public CourseDto(Course course) {
+        this.id = course.getId();
+        this.teacherId = course.getTeacher().getId();
+        this.title = course.getTitle();
+        this.description = course.getDescription();
+        this.maxStudents = course.getMaxStudents();
+        this.level = course.getLevel();
+        this.language = course.getLanguage();
+    }
+
 
 }

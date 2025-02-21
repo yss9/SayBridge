@@ -7,8 +7,11 @@ import EnrollmentListModal from './EnrollmentListModal';
 const Container = styled.div`
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
 `;
 
 const Main = styled.main`

@@ -10,9 +10,6 @@ const checkApi = {
     checkEmail: (email) => apiClient.get(`/auth/email-exists?email=${email}`)
 };
 
-const userInfoApi = {
-   userInfo:() => apiClient.get('/user/me', { withCredentials:true})
-};
 
 const uploadApi = {
     fileUpload: (file) => {
@@ -27,4 +24,4 @@ const uploadApi = {
     }
 };
 
-export { authApi, checkApi,userInfoApi, uploadApi };
+export { authApi, checkApi, uploadApi };

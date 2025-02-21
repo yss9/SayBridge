@@ -23,19 +23,19 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<UserProfileResponse> getCurrentUser(Authentication authentication) {
         UserProfileResponse userProfile = userService.getUserProfile(authentication);
         return ResponseEntity.ok(userProfile);
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<?> updateCourse(Authentication authentication, @RequestBody UserUpdateRequest userUpdateRequest) {
+    public ResponseEntity<Void> updateCourse(Authentication authentication, @RequestBody UserUpdateRequest userUpdateRequest) {
         userService.updateUserProfile(authentication, userUpdateRequest);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteCourse(Authentication authentication) {
+    public ResponseEntity<Void> deleteCourse(Authentication authentication) {
         userService.deleteUser(authentication);
         return ResponseEntity.ok().build();
     }

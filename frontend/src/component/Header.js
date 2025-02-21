@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import {authApi, userInfoApi} from "../api/authApi";
+import {authApi} from "../api/authApi";
+import {userInfoApi} from "../api/userApi";
 import {useNavigate} from "react-router-dom";
 
 const HeaderContainer = styled.header`

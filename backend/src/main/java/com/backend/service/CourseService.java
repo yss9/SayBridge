@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +33,12 @@ public class CourseService {
 
     public List<CourseSearchResponse> findCourses(Language language, CourseLevel level) {
         return courseRepository.searchCourses(language, level);
+    }
+
+    public CourseDto findCourseById(Long id) {
+        Course course = courseRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다."));
+        CourseDto courseDto = new CourseDto(course);
+        return courseDto;
     }
 
     public List<Course> findAllCourses() {
@@ -58,8 +65,8 @@ public class CourseService {
         emailService.sendNewCourseNotification(course);
     }
 
-    public void updateCourse(CourseDto courseDto) {
-        Course course = courseRepository.findById(courseDto.getId()).orElseThrow(() -> new UsernameNotFoundException("강의를 찾을 수 없습니다."));
+    public void updateCourse(Long courseId, CourseDto courseDto) {
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new UsernameNotFoundException("강의를 찾을 수 없습니다."));
         if(courseDto.getTitle()!=null) {
             course.setTitle(courseDto.getTitle());
         }
