@@ -2,11 +2,14 @@ package com.backend.dto;
 
 import com.backend.entity.Language;
 import com.backend.entity.TeacherProfile;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class TeacherProfileDto {
 
     private Long id;

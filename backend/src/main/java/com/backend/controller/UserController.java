@@ -1,16 +1,11 @@
 package com.backend.controller;
 
-import com.backend.dto.CourseDto;
 import com.backend.dto.UserProfileResponse;
 import com.backend.dto.UserUpdateRequest;
-import com.backend.entity.User;
-import com.backend.repository.UserRepository;
 import com.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -40,5 +35,10 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/verify-password")
+    public  ResponseEntity<Map<String, Object>> verifyPassword(Authentication authentication, @RequestBody String password) {
+        Map<String, Object> results = userService.verifyPassword(authentication, password);
+        return ResponseEntity.ok(results);
+    }
 
 }

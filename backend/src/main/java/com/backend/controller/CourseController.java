@@ -7,8 +7,10 @@ import com.backend.entity.CourseLevel;
 import com.backend.entity.Language;
 import com.backend.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,13 +24,16 @@ public class CourseController {
     private CourseService courseService;
 
     @GetMapping("/search")
-    public List<CourseSearchResponse> findCourses(@RequestParam(required = false) Language language,
-                                                  @RequestParam(required = false) CourseLevel level) {
-        return courseService.findCourses(language, level);
+    public List<CourseSearchResponse> findCourses(
+            @RequestParam(required = false) @Nullable Language language,
+            @RequestParam(required = false) @Nullable CourseLevel level,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size) {
+        return courseService.findCourses(language, level, page, size);
     }
 
     @GetMapping("/list")
-    public List<Course> findAllCourses(){
+    public List<CourseDto> findAllCourses(){
         return courseService.findAllCourses();
     }
 
@@ -36,6 +41,13 @@ public class CourseController {
     public CourseDto getCourse(@PathVariable Long courseId) {
         return courseService.findCourseById(courseId);
     }
+
+    @GetMapping
+    public Page<CourseDto> getCourses(@RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = "9") int size){
+        return courseService.getCourses(page, size);
+    }
+
 
     @PostMapping("/create")
     public ResponseEntity<Void> createCourse(@RequestBody CourseDto course, Authentication authentication) {

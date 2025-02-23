@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
+import CourseList from "./pages/CourseList";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import VideoChat from "./pages/VideoChat";
@@ -15,14 +15,13 @@ const App = () => {
         <Router>
             <Routes>
                 <Route path="/" element={<Introduce />} />
-                <Route path="/home" element={<Home />} />
+                <Route path="/courselist" element={<CourseList />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/mypage" element={<MyPage />} />
                 <Route path="/teacherprofile" element={<TeacherProfile />}/>
                 <Route path="/videochat" element={<VideoChat />} />
                 <Route path="/course" element={<Course />} />
-
                 <Route path="/file" element={<FileUpload/>}/>
             </Routes>
         </Router>

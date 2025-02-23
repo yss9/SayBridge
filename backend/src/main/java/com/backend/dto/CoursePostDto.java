@@ -1,13 +1,16 @@
 package com.backend.dto;
 
 import com.backend.entity.CoursePost;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class CoursePostDto {
 
     private Long courseId;

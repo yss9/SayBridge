@@ -4,11 +4,14 @@ package com.backend.dto;
 import com.backend.entity.Course;
 import com.backend.entity.CourseLevel;
 import com.backend.entity.Language;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class CourseDto {
 
     private Long id;

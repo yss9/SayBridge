@@ -22,7 +22,8 @@ public class CoursePostService {
     private CourseRepository courseRepository;
 
     public List<CoursePostDto> findCoursePostsByCourseId(Long courseId) {
-        List<CoursePost> coursePostsByCourseId = coursePostRepository.findCoursePostsByCourseId(courseId);
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new UsernameNotFoundException("Course not found"));
+        List<CoursePost> coursePostsByCourseId = coursePostRepository.findCoursePostsByCourseId(course);
         List<CoursePostDto> coursePostDtos = new ArrayList<>();
         for (CoursePost coursePost : coursePostsByCourseId) {
             coursePostDtos.add(new CoursePostDto(coursePost));
@@ -53,8 +54,10 @@ public class CoursePostService {
         }
         coursePostRepository.save(coursePost);
     }
+
     public void coursePostsDelete(Long id) {
         coursePostRepository.deleteById(id);
     }
+
 
 }

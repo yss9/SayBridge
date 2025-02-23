@@ -1,8 +1,9 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
+import {courseApi} from "../api/courseApi";
 
 const Container = styled.div`
     display: flex;
@@ -352,11 +353,34 @@ const ChartPlaceholder = styled.div`
     }
 `;
 
+const CourseDetails = styled.div`
+    display: flex;
+    
+    flex-direction: column;
+    font-size: 0.9rem;
+`;
+
 const IntroducePage = () => {
     const navigate = useNavigate();
+    const [courses, setCourses] = useState([]);
+
+    useEffect(() => {
+        courseApi.getCourses(0, 3)
+            .then(response => {
+                // 서버 응답이 Page 객체라면 content 배열에 실제 코스 데이터가 있음
+                setCourses(response.data.content);
+            })
+            .catch(error => {
+                console.error('Failed to fetch courses', error);
+            });
+    }, []);
 
     const handleGoLogin = () => {
         navigate('/signin');
+    };
+
+    const handleGoCourse  = () => {
+       navigate('/home');
     };
 
     return (
@@ -383,24 +407,22 @@ const IntroducePage = () => {
                 <FeaturedCoursesSection>
                     <SectionHeader>
                         <h2>Featured Courses</h2>
-                        <ViewAllButton>View All Courses</ViewAllButton>
+                        <ViewAllButton onClick={handleGoCourse}>View All Courses</ViewAllButton>
                     </SectionHeader>
                     <CourseCards>
-                        <CourseCard>
-                            <div className="img-placeholder">Course Image</div>
-                            <h3>Intermediate Conversation</h3>
-                            <p>8 Weeks</p>
-                        </CourseCard>
-                        <CourseCard>
-                            <div className="img-placeholder">Course Image</div>
-                            <h3>Business English Conversation</h3>
-                            <p>12 Weeks</p>
-                        </CourseCard>
-                        <CourseCard>
-                            <div className="img-placeholder">Course Image</div>
-                            <h3>Daily English Exercises</h3>
-                            <p>4 Weeks</p>
-                        </CourseCard>
+                        {
+                            courses.map(course => (
+                                <CourseCard key={course.id}>
+                                    <h3>{course.title}</h3>
+                                    <p>{course.description}</p>
+                                    <CourseDetails>
+                                        <div><strong>Capacity:</strong> {course.maxStudents} Students</div>
+                                        <div><strong>Language:</strong> {course.language}</div>
+                                        <div><strong>Level:</strong> {course.level}</div>
+                                    </CourseDetails>
+                                </CourseCard>
+                            ))
+                        }
                     </CourseCards>
                 </FeaturedCoursesSection>
 

@@ -205,7 +205,7 @@ const SignInPage = () => {
         try {
             await authApi.login(userData);
             alert('로그인 성공');
-            navigate('/home')
+            navigate('/')
 
         } catch (error) {
             console.error(error);

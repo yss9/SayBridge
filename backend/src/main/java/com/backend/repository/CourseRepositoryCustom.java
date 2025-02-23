@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface CourseRepositoryCustom {
-    List<CourseSearchResponse> searchCourses(Language language, CourseLevel level);
+    List<CourseSearchResponse> searchCourses(Language language, CourseLevel level,  int page, int size);
 }

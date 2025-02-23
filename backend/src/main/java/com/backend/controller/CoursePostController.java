@@ -16,9 +16,9 @@ public class CoursePostController {
     @Autowired
     private CoursePostService coursePostService;
 
-    @GetMapping("/{postId}")
-    public List<CoursePostDto> getCoursePosts(@PathVariable Long postId) {
-        return coursePostService.findCoursePostsByCourseId(postId);
+    @GetMapping("/{courseId}")
+    public List<CoursePostDto> getCoursePosts(@PathVariable Long courseId) {
+        return coursePostService.findCoursePostsByCourseId(courseId);
     }
 
     @PostMapping("/create")

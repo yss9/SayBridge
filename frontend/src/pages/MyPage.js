@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
+import { userInfoApi } from "../api/userApi";
 
 const PageContainer = styled.div`
     display: flex;
@@ -266,8 +267,41 @@ const SaveButton = styled.button`
     }
 `;
 
+const CheckButton = styled.button`
+    background: #007BFF;
+    color: #fff;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    &:hover {
+        background: #0056b3;
+    }
+`;
+
 const MyPage = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [profile, setProfile] = useState({});
+    const [nickname, setNickname] = useState('');
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [currentPwVerified, setCurrentPwVerified] = useState(false);
+    const [pwError, setPwError] = useState('');
+    const [profileImage, setProfileImage] = useState(null);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const response = await userInfoApi.userInfo();
+                setProfile(response.data);
+                setNickname(response.data.nickname);
+            } catch (err) {
+                console.error("프로필 가져오기 실패", err);
+            }
+        };
+        fetchProfile();
+    }, []);
 
     const handleOpenEditModal = () => {
         setIsEditModalOpen(true);
@@ -275,6 +309,94 @@ const MyPage = () => {
 
     const handleCloseEditModal = () => {
         setIsEditModalOpen(false);
+        // 모달 닫을 때 관련 상태 초기화
+        setCurrentPassword('');
+        setNewPassword('');
+        setCurrentPwVerified(false);
+        setPwError('');
+        setProfileImage(null);
+    };
+
+    // 현재 비밀번호 확인 API 호출
+    const handleCheckCurrentPassword = async () => {
+        try {
+            const res = await userInfoApi.verifyPassword({ password: currentPassword });
+            if (res.data.success) {
+                setCurrentPwVerified(true);
+                setPwError(res.data.message);
+            } else {
+                setCurrentPwVerified(false);
+                setPwError(res.data.message);
+            }
+        } catch (err) {
+            setPwError('비밀번호 확인 중 오류가 발생했습니다.');
+        }
+    };
+
+    // 새 비밀번호 유효성 검사 함수 (영문, 숫자, 특수문자 포함 8자 이상)
+    const validateNewPassword = (password) => {
+        const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+        return regex.test(password);
+    };
+
+    // 파일 선택 핸들러
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setProfileImage(e.target.files[0]);
+        }
+    };
+
+    // 저장 버튼 클릭 시 처리
+    const handleSaveChanges = async () => {
+        let uploadedImageUrl = profile.imageUrl || null;
+
+        // 프로필 이미지가 선택되었다면 별도의 업로드 API 호출 (업로드 후 URL 획득)
+        if (profileImage) {
+            try {
+                const formData = new FormData();
+                formData.append('profileImage', profileImage);
+                const res = await userInfoApi.uploadProfileImage(formData);
+                if (res.data.success) {
+                    uploadedImageUrl = res.data.imageUrl;
+                } else {
+                    console.error('프로필 이미지 업로드 실패');
+                }
+            } catch (err) {
+                console.error('프로필 이미지 업로드 중 오류 발생', err);
+            }
+        }
+
+        // 새 비밀번호가 입력된 경우 유효성 검사 수행
+        if (newPassword && !validateNewPassword(newPassword)) {
+            setPwError('새 비밀번호는 영문, 숫자, 특수문자를 포함한 8자 이상이어야 합니다.');
+            return;
+        }
+
+        // 비밀번호 업데이트가 필요한 경우 현재 비밀번호 확인 필수
+        if (currentPassword && newPassword) {
+            if (!currentPwVerified) {
+                setPwError('먼저 현재 비밀번호를 확인해주세요.');
+                return;
+            }
+        }
+
+        // 백엔드에 전달할 업데이트 데이터 구성
+        const updateData = {
+            username: profile.username, // 변경하지 않을 경우 기존 값 전달
+            nickname: nickname,
+            imageUrl: uploadedImageUrl,
+            password: (currentPassword && newPassword) ? currentPassword : null,
+            newPassword: (currentPassword && newPassword) ? newPassword : null,
+        };
+
+        try {
+            // PATCH /update 엔드포인트로 한 번에 업데이트 요청
+            await userInfoApi.updateUserProfile(updateData);
+            handleCloseEditModal();
+        } catch (err) {
+            console.error('프로필 업데이트 오류', err);
+            setPwError('프로필 업데이트 중 오류가 발생했습니다.');
+        }
     };
 
     return (
@@ -285,9 +407,8 @@ const MyPage = () => {
                     <UserInfo>
                         <UserPhoto />
                         <div>
-                            <UserName>User Name</UserName>
-                            <UserLevel>Beginner</UserLevel>
-                            <UserDescription>Update your profile information and settings</UserDescription>
+                            <UserName>{profile.nickname}</UserName>
+                            <UserLevel>{profile.username}</UserLevel>
                         </div>
                     </UserInfo>
                     <ButtonGroup>
@@ -344,17 +465,50 @@ const MyPage = () => {
                         <ModalTitle>Edit Profile</ModalTitle>
                         <ModalFormGroup>
                             <Label htmlFor="nickname">Nickname</Label>
-                            <Input id="nickname" type="text" placeholder="Enter new nickname" />
+                            <Input
+                                id="nickname"
+                                type="text"
+                                value={nickname}
+                                onChange={(e) => setNickname(e.target.value)}
+                                placeholder="Enter new nickname"
+                            />
                         </ModalFormGroup>
                         <ModalFormGroup>
-                            <Label htmlFor="name">Name</Label>
-                            <Input id="name" type="text" placeholder="Enter new name" />
+                            <Label htmlFor="currentPassword">Current Password</Label>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <Input
+                                    id="currentPassword"
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    placeholder="Enter current password"
+                                />
+                                <CheckButton onClick={handleCheckCurrentPassword}>Check</CheckButton>
+                            </div>
                         </ModalFormGroup>
                         <ModalFormGroup>
-                            <Label htmlFor="password">Password</Label>
-                            <Input id="password" type="password" placeholder="Enter new password" />
+                            <Label htmlFor="newPassword">New Password</Label>
+                            <Input
+                                id="newPassword"
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="Enter new password"
+                            />
                         </ModalFormGroup>
-                        <SaveButton>Save Changes</SaveButton>
+                        <ModalFormGroup>
+                            <Label htmlFor="profileImage">Profile Image</Label>
+                            <Input
+                                id="profileImage"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                            />
+                        </ModalFormGroup>
+                        {pwError && (
+                            <div style={{ color: 'red', fontSize: '12px' }}>{pwError}</div>
+                        )}
+                        <SaveButton onClick={handleSaveChanges}>Save Changes</SaveButton>
                     </ModalContent>
                 </ModalOverlay>
             )}

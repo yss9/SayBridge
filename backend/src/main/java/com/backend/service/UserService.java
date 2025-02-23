@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -22,7 +23,6 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public UserProfileResponse getUserProfile(Authentication authentication) {
-
         User user = getUser(authentication);
         if (user == null) return null;
 
@@ -32,8 +32,6 @@ public class UserService {
 
 
     public void updateUserProfile(Authentication authentication, UserUpdateRequest updateData) {
-        System.out.println("updateData = " + updateData.getUsername());
-
         User user = getUser(authentication);
 
         if (updateData.getUsername() != null) {
@@ -73,4 +71,17 @@ public class UserService {
         return user;
     }
 
+    public Map<String, Object> verifyPassword(Authentication authentication, String password) {
+        Map<String, Object> results = new HashMap<>();
+        User user = getUser(authentication);
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            results.put("success", false);
+            results.put("message", "비밀번호가 일치하지 않습니다.");
+        }
+        else  {
+            results.put("success", true);
+            results.put("message", "비밀번호가 일치합니다.");
+        }
+        return results;
+    }
 }
