@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
 import { userInfoApi } from "../api/userApi";
+import { uploadApi, authApi } from "../api/authApi";
+import { courseApi } from "../api/courseApi";
 
 const PageContainer = styled.div`
     display: flex;
@@ -41,8 +43,10 @@ const UserInfo = styled.div`
 const UserPhoto = styled.div`
     width: 100px;
     height: 100px;
-    background: #ccc;
     border-radius: 100%;
+    background-image: url(${props => props.src});
+    background-size: cover;
+    background-position: center;
 `;
 
 const UserName = styled.h1`
@@ -55,11 +59,6 @@ const UserLevel = styled.span`
     background: #444;
     padding: 4px 8px;
     border-radius: 4px;
-`;
-
-const UserDescription = styled.p`
-    font-size: 14px;
-    margin: 0;
 `;
 
 const ButtonGroup = styled.div`
@@ -102,41 +101,76 @@ const SectionTitle = styled.h2`
     margin: 0;
 `;
 
+const SliderContainer = styled.div`
+    position: relative;
+    width: 1000px;    /* ★ 고정 폭 ★ */
+    margin: 0 auto;
+    overflow: visible;
+    box-sizing: border-box;
+`;
+
 const CoursesList = styled.div`
     display: flex;
-    gap: 40px;
-    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: ${(props) => (props.$center ? 'center' : 'flex-start')};
 `;
 
 const CourseCard = styled.div`
-    flex: 1 1 200px;
+    flex: none;
+    width: 280px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
-    min-width: 180px;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
 `;
 
 const CourseImage = styled.div`
-    width: 80px;
-    height: 80px;
+    width: 100%;
+    height: 120px;
     background: #ccc;
     border-radius: 4px;
 `;
 
 const CourseName = styled.div`
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
 `;
 
-const CourseStatus = styled.div`
+const CourseInfo = styled.div`
     font-size: 14px;
     color: #666;
 `;
 
-const CourseModules = styled.div`
-    font-size: 18px;
-    font-weight: bold;
+const ArrowButton = styled.button`
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    &:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+`;
+
+const LeftArrow = styled(ArrowButton)`
+    position: absolute;
+    left: -6%;
+    top: 50%;
+    transform: translateY(-50%);
+`;
+
+const RightArrow = styled(ArrowButton)`
+    position: absolute;
+    right: -5%;
+    top: 50%;
+    transform: translateY(-50%);
 `;
 
 const ReviewsSection = styled.section`
@@ -283,19 +317,28 @@ const CheckButton = styled.button`
 const MyPage = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [profile, setProfile] = useState({});
-    const [nickname, setNickname] = useState('');
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
+    const [file, setFile] = useState(null);
+    const [nickname, setNickname] = useState("");
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
     const [currentPwVerified, setCurrentPwVerified] = useState(false);
     const [pwError, setPwError] = useState('');
     const [profileImage, setProfileImage] = useState(null);
+    const [message, setMessage] = useState('');
+    const [email, setEmail] = useState("");
+    const [courses, setCourses] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await userInfoApi.userInfo();
-                setProfile(response.data);
-                setNickname(response.data.nickname);
+                const profileResponse = await userInfoApi.userInfo();
+                setProfile(profileResponse.data);
+                setNickname(profileResponse.data.nickname || "");
+                setEmail(profileResponse.data.email || "");
+
+                const coursesResponse = await courseApi.getCourseByUserId();
+                setCourses(coursesResponse.data);
             } catch (err) {
                 console.error("프로필 가져오기 실패", err);
             }
@@ -303,27 +346,37 @@ const MyPage = () => {
         fetchProfile();
     }, []);
 
+    const handlePrev = () => {
+        setCurrentIndex(prev => Math.max(0, prev - 3));
+    };
+
+    const handleNext = () => {
+        setCurrentIndex(prev => {
+            const newIndex = prev + 3;
+            return newIndex < courses.length ? newIndex : prev;
+        });
+    };
+
     const handleOpenEditModal = () => {
         setIsEditModalOpen(true);
     };
 
     const handleCloseEditModal = () => {
         setIsEditModalOpen(false);
-        // 모달 닫을 때 관련 상태 초기화
-        setCurrentPassword('');
-        setNewPassword('');
+        setCurrentPassword("");
+        setNewPassword("");
         setCurrentPwVerified(false);
-        setPwError('');
-        setProfileImage(null);
+        setPwError("");
+        setProfileImage("");
     };
 
-    // 현재 비밀번호 확인 API 호출
     const handleCheckCurrentPassword = async () => {
         try {
-            const res = await userInfoApi.verifyPassword({ password: currentPassword });
+            const request = { email, password: currentPassword };
+            const res = await authApi.verifyPassword(request);
             if (res.data.success) {
                 setCurrentPwVerified(true);
-                setPwError(res.data.message);
+                setPwError("");
             } else {
                 setCurrentPwVerified(false);
                 setPwError(res.data.message);
@@ -333,71 +386,63 @@ const MyPage = () => {
         }
     };
 
-    // 새 비밀번호 유효성 검사 함수 (영문, 숫자, 특수문자 포함 8자 이상)
     const validateNewPassword = (password) => {
         const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
         return regex.test(password);
     };
 
-    // 파일 선택 핸들러
-    const handleFileChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setProfileImage(e.target.files[0]);
-        }
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]);
     };
 
-    // 저장 버튼 클릭 시 처리
-    const handleSaveChanges = async () => {
-        let uploadedImageUrl = profile.imageUrl || null;
-
-        // 프로필 이미지가 선택되었다면 별도의 업로드 API 호출 (업로드 후 URL 획득)
-        if (profileImage) {
+    const handleSaveChanges = async (event) => {
+        event.preventDefault();
+        let updateFileUrl = "";
+        if (file) {
             try {
-                const formData = new FormData();
-                formData.append('profileImage', profileImage);
-                const res = await userInfoApi.uploadProfileImage(formData);
-                if (res.data.success) {
-                    uploadedImageUrl = res.data.imageUrl;
-                } else {
-                    console.error('프로필 이미지 업로드 실패');
-                }
-            } catch (err) {
-                console.error('프로필 이미지 업로드 중 오류 발생', err);
-            }
-        }
-
-        // 새 비밀번호가 입력된 경우 유효성 검사 수행
-        if (newPassword && !validateNewPassword(newPassword)) {
-            setPwError('새 비밀번호는 영문, 숫자, 특수문자를 포함한 8자 이상이어야 합니다.');
-            return;
-        }
-
-        // 비밀번호 업데이트가 필요한 경우 현재 비밀번호 확인 필수
-        if (currentPassword && newPassword) {
-            if (!currentPwVerified) {
-                setPwError('먼저 현재 비밀번호를 확인해주세요.');
+                const response = await uploadApi.fileUpload(file);
+                setMessage(`파일 업로드 성공: ${response.data}`);
+                updateFileUrl = response.data;
+            } catch (error) {
+                setMessage(`업로드 실패: ${error.response?.data || error.message}`);
                 return;
             }
         }
 
-        // 백엔드에 전달할 업데이트 데이터 구성
-        const updateData = {
-            username: profile.username, // 변경하지 않을 경우 기존 값 전달
+        if (newPassword && !validateNewPassword(newPassword)) {
+            setPwError("새 비밀번호는 영문, 숫자, 특수문자를 포함한 8자 이상이어야 합니다.");
+            return;
+        }
+
+        let updateData = {
             nickname: nickname,
-            imageUrl: uploadedImageUrl,
-            password: (currentPassword && newPassword) ? currentPassword : null,
-            newPassword: (currentPassword && newPassword) ? newPassword : null,
+            imageUrl: updateFileUrl,
+            password: currentPassword,
+            newPassword: newPassword,
         };
 
+        updateData = Object.fromEntries(
+            Object.entries(updateData).filter(
+                ([, value]) => value !== "" && value !== null && value !== undefined
+            )
+        );
+
         try {
-            // PATCH /update 엔드포인트로 한 번에 업데이트 요청
             await userInfoApi.updateUserProfile(updateData);
+            setMessage("프로필이 성공적으로 업데이트되었습니다.");
             handleCloseEditModal();
         } catch (err) {
-            console.error('프로필 업데이트 오류', err);
-            setPwError('프로필 업데이트 중 오류가 발생했습니다.');
+            console.error("프로필 업데이트 오류", err);
+            setPwError("프로필 업데이트 중 오류가 발생했습니다.");
         }
     };
+
+    // 코스가 3개 미만이면 가운데 정렬
+    const isCenter = courses.length < 3;
+
+    // 화살표 비활성화 조건
+    const disablePrev = currentIndex === 0 || courses.length <= 3;
+    const disableNext = currentIndex + 3 >= courses.length || courses.length <= 3;
 
     return (
         <PageContainer>
@@ -405,7 +450,7 @@ const MyPage = () => {
             <Banner>
                 <BannerContent>
                     <UserInfo>
-                        <UserPhoto />
+                        <UserPhoto src={profile.profileImageUrl || 'https://via.placeholder.com/100'} />
                         <div>
                             <UserName>{profile.nickname}</UserName>
                             <UserLevel>{profile.username}</UserLevel>
@@ -419,20 +464,30 @@ const MyPage = () => {
             <Main>
                 <CoursesSection>
                     <SectionTitle>Current Courses</SectionTitle>
-                    <CoursesList>
-                        <CourseCard>
-                            <CourseImage />
-                            <CourseName>Course 1</CourseName>
-                            <CourseStatus>In Progress</CourseStatus>
-                            <CourseModules>3/8 Modules</CourseModules>
-                        </CourseCard>
-                        <CourseCard>
-                            <CourseImage />
-                            <CourseName>Course 2</CourseName>
-                            <CourseStatus>Not Started</CourseStatus>
-                            <CourseModules>0/6 Modules</CourseModules>
-                        </CourseCard>
-                    </CoursesList>
+                    <SliderContainer>
+                        <LeftArrow onClick={handlePrev} disabled={disablePrev}>
+                            ◀
+                        </LeftArrow>
+
+                        <CoursesList $center={isCenter}>
+                            {courses.slice(currentIndex, currentIndex + 3).map(course => (
+                                <CourseCard key={course.id} id={`course-${course.id}`}>
+                                    <CourseImage />
+                                    <CourseName>{course.title}</CourseName>
+                                    <CourseInfo>Teacher: {course.teacherId}</CourseInfo>
+                                    <CourseInfo>Description: {course.description}</CourseInfo>
+                                    <CourseInfo>Max Students: {course.maxStudents}</CourseInfo>
+                                    <CourseInfo>Language: {course.language}</CourseInfo>
+                                    <CourseInfo>Level: {course.level}</CourseInfo>
+                                </CourseCard>
+                            ))}
+                        </CoursesList>
+
+                        <RightArrow onClick={handleNext} disabled={disableNext}>
+                            ▶
+                        </RightArrow>
+                    </SliderContainer>
+
                 </CoursesSection>
                 <ReviewsSection>
                     <SectionTitle>User Reviews</SectionTitle>
@@ -485,6 +540,13 @@ const MyPage = () => {
                                 />
                                 <CheckButton onClick={handleCheckCurrentPassword}>Check</CheckButton>
                             </div>
+                            {currentPassword && (
+                                currentPwVerified ? (
+                                    <div style={{ color: 'green', fontSize: '12px' }}>현재 비밀번호가 확인되었습니다.</div>
+                                ) : (
+                                    pwError && <div style={{ color: 'red', fontSize: '12px' }}>{pwError}</div>
+                                )
+                            )}
                         </ModalFormGroup>
                         <ModalFormGroup>
                             <Label htmlFor="newPassword">New Password</Label>
@@ -494,20 +556,16 @@ const MyPage = () => {
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 placeholder="Enter new password"
+                                disabled={!currentPwVerified}
                             />
                         </ModalFormGroup>
                         <ModalFormGroup>
-                            <Label htmlFor="profileImage">Profile Image</Label>
+                            <Label>Profile Image</Label>
                             <Input
-                                id="profileImage"
                                 type="file"
-                                accept="image/*"
                                 onChange={handleFileChange}
                             />
                         </ModalFormGroup>
-                        {pwError && (
-                            <div style={{ color: 'red', fontSize: '12px' }}>{pwError}</div>
-                        )}
                         <SaveButton onClick={handleSaveChanges}>Save Changes</SaveButton>
                     </ModalContent>
                 </ModalOverlay>

@@ -4,13 +4,17 @@ import com.backend.dto.LoginRequest;
 import com.backend.dto.LoginResponse;
 import com.backend.dto.RegisterRequest;
 import com.backend.service.AuthService;
+import com.backend.service.UserService;
 import com.backend.util.JwtTokenUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,6 +22,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
@@ -64,5 +71,11 @@ public class AuthController {
     public ResponseEntity<Boolean> emailExists(@RequestParam String email) {
         boolean existEmail = authService.existEmail(email);
         return ResponseEntity.ok(existEmail);
+    }
+
+    @PostMapping("/verify-password")
+    public  ResponseEntity<Map<String, Object>> verifyPassword(Authentication authentication, @RequestBody LoginRequest request) {
+        Map<String, Object> results = userService.verifyPassword(authentication, request);
+        return ResponseEntity.ok(results);
     }
 }

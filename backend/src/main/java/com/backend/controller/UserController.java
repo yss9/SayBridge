@@ -1,5 +1,6 @@
 package com.backend.controller;
 
+import com.backend.dto.LoginRequest;
 import com.backend.dto.UserProfileResponse;
 import com.backend.dto.UserUpdateRequest;
 import com.backend.service.UserService;
@@ -35,10 +36,5 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/verify-password")
-    public  ResponseEntity<Map<String, Object>> verifyPassword(Authentication authentication, @RequestBody String password) {
-        Map<String, Object> results = userService.verifyPassword(authentication, password);
-        return ResponseEntity.ok(results);
-    }
 
 }

@@ -11,7 +11,9 @@ const courseApi = {
         params.append('page', page);
         params.append('size', size);
         return apiClient.get(`/course/search?${params.toString()}`, { withCredentials: true });
-    }
+    },
+    getCourseByUserId:()=>
+        apiClient.get('/course/student/list', {withCredentials:true})
 };
 
 export { courseApi };

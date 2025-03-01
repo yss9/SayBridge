@@ -9,6 +9,7 @@ import Introduce from "./pages/Introduce";
 import MyPage from "./pages/MyPage";
 import TeacherProfile from "./pages/TeacherProfile";
 import FileUpload from "./pages/FileUpload";
+import RequestTest from "./pages/RequestTest";
 
 const App = () => {
     return (
@@ -23,6 +24,7 @@ const App = () => {
                 <Route path="/videochat" element={<VideoChat />} />
                 <Route path="/course" element={<Course />} />
                 <Route path="/file" element={<FileUpload/>}/>
+                <Route path="/test" element={<RequestTest/>}/>
             </Routes>
         </Router>
     );

@@ -1,6 +1,8 @@
 package com.backend.repository;
 
 import com.backend.entity.Course;
+import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +17,7 @@ public interface CourseRepository extends JpaRepository<Course, Long>, CourseRep
 
     @Override
     List<Course> findAll();
+
+    List<Course> findAllById(Long id);
+
 }

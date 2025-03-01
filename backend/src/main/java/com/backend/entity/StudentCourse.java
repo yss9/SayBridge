@@ -30,4 +30,5 @@ public class StudentCourse {
     public void prePersist() {
         this.joinedAt = LocalDateTime.now();
     }
+
 }

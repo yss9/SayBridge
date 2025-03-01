@@ -67,4 +67,11 @@ public class CourseController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/student/list")
+    public ResponseEntity<List<CourseDto>> getCourseById(Authentication authentication) {
+        List<CourseDto> coursesByStudentId = courseService.findCoursesByStudentId(authentication);
+        return ResponseEntity.ok(coursesByStudentId);
+    }
+
+
 }

@@ -33,9 +33,10 @@ public class SecurityConfig {
                                 "/api/oauth2/**",
                                 "/api/auth/**",
                                 "/api/test/**",
-                                "/files/**",
+                                "/api/files/**",
                                 "/error"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.disable())

@@ -2,8 +2,10 @@ package com.backend.service;
 
 import com.backend.dto.CourseDto;
 import com.backend.dto.CourseSearchResponse;
+import com.backend.dto.StudentCourseDto;
 import com.backend.entity.*;
 import com.backend.repository.CourseRepository;
+import com.backend.repository.StudentCourseRepository;
 import com.backend.repository.TeacherProfileRepository;
 import com.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,9 @@ public class CourseService {
 
     @Autowired
     private TeacherProfileRepository teacherProfileRepository;
+
+    @Autowired
+    private StudentCourseRepository studentCourseRepository;
 
     public List<CourseSearchResponse> findCourses(Language language, CourseLevel level, int page, int size) {
         return courseRepository.searchCourses(language, level, page, size);
@@ -102,5 +107,18 @@ public class CourseService {
     public void deleteCourse(Long id) {
         courseRepository.deleteById(id);
     }
+
+    public List<CourseDto> findCoursesByStudentId(Authentication authentication) {
+        String email = (String) authentication.getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다."));
+        List<StudentCourse> studentCourses = studentCourseRepository.findByStudentId(user.getId());
+
+        return studentCourses.stream()
+                .map(studentCourse -> new CourseDto(studentCourse.getCourse()))
+                .collect(Collectors.toList());
+    }
+
+
 
 }

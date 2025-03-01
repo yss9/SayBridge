@@ -17,19 +17,14 @@ public class FileController {
     @Autowired
     private S3Service s3Service;
 
-    @GetMapping("/test")
-    public String test(){
-        return "test";
-    }
-
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestPart(value = "file", required = false) MultipartFile multipartFile) throws IOException {
         File file = convertMultipartFileToFile(multipartFile);
-
+        System.out.println("file = " + file);
         String fileUrl = s3Service.uploadFile(file);
-
+        System.out.println("fileUrl = " + fileUrl);
         file.delete();
-        return ResponseEntity.ok("File uploaded successfully: " + fileUrl);
+        return ResponseEntity.ok(fileUrl);
     }
 
     private File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException {

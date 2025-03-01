@@ -1,5 +1,6 @@
 package com.backend.service;
 
+import com.backend.dto.LoginRequest;
 import com.backend.dto.UserProfileResponse;
 import com.backend.dto.UserUpdateRequest;
 import com.backend.entity.User;
@@ -71,10 +72,10 @@ public class UserService {
         return user;
     }
 
-    public Map<String, Object> verifyPassword(Authentication authentication, String password) {
+    public Map<String, Object> verifyPassword(Authentication authentication, LoginRequest password) {
         Map<String, Object> results = new HashMap<>();
         User user = getUser(authentication);
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        if (!passwordEncoder.matches(password.getPassword(), user.getPassword())) {
             results.put("success", false);
             results.put("message", "비밀번호가 일치하지 않습니다.");
         }
