@@ -6,8 +6,6 @@ import com.backend.dto.UserUpdateRequest;
 import com.backend.entity.User;
 import com.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +21,7 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserProfileResponse getUserProfile(Authentication authentication) {
-        User user = getUser(authentication);
+    public UserProfileResponse getUserProfile(User user) {
         if (user == null) return null;
 
         UserProfileResponse profile = new UserProfileResponse(user.getEmail(), user.getUsername(), user.getNickname(), user.getProfileImageUrl());
@@ -32,9 +29,7 @@ public class UserService {
     }
 
 
-    public void updateUserProfile(Authentication authentication, UserUpdateRequest updateData) {
-        User user = getUser(authentication);
-
+    public void updateUserProfile(User user, UserUpdateRequest updateData) {
         if (updateData.getUsername() != null) {
             user.setUsername(updateData.getUsername());
         }
@@ -56,25 +51,12 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void deleteUser(Authentication authentication) {
-        User user = getUser(authentication);
+    public void deleteUser(User user) {
         userRepository.delete(user);
     }
 
-
-    private User getUser(Authentication authentication) {
-        if (authentication == null) {
-            return null;
-        }
-        String email = (String) authentication.getPrincipal();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        return user;
-    }
-
-    public Map<String, Object> verifyPassword(Authentication authentication, LoginRequest password) {
+    public Map<String, Object> verifyPassword(User user, LoginRequest password) {
         Map<String, Object> results = new HashMap<>();
-        User user = getUser(authentication);
         if (!passwordEncoder.matches(password.getPassword(), user.getPassword())) {
             results.put("success", false);
             results.put("message", "비밀번호가 일치하지 않습니다.");

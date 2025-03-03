@@ -3,9 +3,11 @@ package com.backend.service;
 
 import com.backend.entity.Course;
 import com.backend.entity.Subscriber;
+import com.backend.event.CourseCreatedEvent;
 import com.backend.repository.SubscriberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -24,9 +26,13 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    public void sendNewCourseNotification(Course course) {
-        List<Subscriber> subscribers = subscriberRepository.findAll();
+    @EventListener
+    public void handleCourseCreatedEvent(CourseCreatedEvent event) {
+        // 이벤트에서 새로 생성된 Course 꺼내기
+        Course course = event.getCourse();
 
+        // 구독자 목록 조회 후 메일 전송
+        List<Subscriber> subscribers = subscriberRepository.findAll();
         for (Subscriber subscriber : subscribers) {
             sendEmail(subscriber.getEmail(), course);
         }

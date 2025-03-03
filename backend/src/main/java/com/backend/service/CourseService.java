@@ -4,12 +4,14 @@ import com.backend.dto.CourseDto;
 import com.backend.dto.CourseSearchResponse;
 import com.backend.dto.StudentCourseDto;
 import com.backend.entity.*;
+import com.backend.event.CourseCreatedEvent;
 import com.backend.repository.CourseRepository;
 import com.backend.repository.StudentCourseRepository;
 import com.backend.repository.TeacherProfileRepository;
 import com.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,13 +35,13 @@ public class CourseService {
     private EmailService emailService;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private TeacherProfileRepository teacherProfileRepository;
 
     @Autowired
     private StudentCourseRepository studentCourseRepository;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     public List<CourseSearchResponse> findCourses(Language language, CourseLevel level, int page, int size) {
         return courseRepository.searchCourses(language, level, page, size);
@@ -64,13 +66,9 @@ public class CourseService {
     }
 
 
-    public void createCourse(CourseDto courseDto, Authentication authentication) {
-        String email = (String) authentication.getPrincipal();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다."));
+    public void createCourse(CourseDto courseDto, User user) {
         TeacherProfile teacherProfile = teacherProfileRepository.findByUser(user)
                 .orElseThrow(() -> new UsernameNotFoundException("선생님 정보를 찾을 수 없습니다."));
-        System.out.println("teacherProfile = " + teacherProfile);
         Course course = new Course();
         course.setTitle(courseDto.getTitle());
         course.setDescription(courseDto.getDescription());
@@ -80,7 +78,9 @@ public class CourseService {
         course.setCurrentStudents(0);
         course.setTeacher(teacherProfile);
         courseRepository.save(course);
-        emailService.sendNewCourseNotification(course);
+
+        CourseCreatedEvent event = new CourseCreatedEvent(course);
+        eventPublisher.publishEvent(event);
     }
 
     public void updateCourse(Long courseId, CourseDto courseDto) {
@@ -108,10 +108,7 @@ public class CourseService {
         courseRepository.deleteById(id);
     }
 
-    public List<CourseDto> findCoursesByStudentId(Authentication authentication) {
-        String email = (String) authentication.getPrincipal();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다."));
+    public List<CourseDto> findCoursesByStudentId(User user) {
         List<StudentCourse> studentCourses = studentCourseRepository.findByStudentId(user.getId());
 
         return studentCourses.stream()

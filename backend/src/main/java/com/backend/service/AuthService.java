@@ -9,6 +9,10 @@ import com.backend.entity.User;
 import com.backend.repository.UserRepository;
 import com.backend.util.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -62,4 +66,13 @@ public class AuthService {
         return userRepository.existsByEmail(email);
     }
 
+    public User getCurrentUser(Authentication authentication) {
+        if (authentication == null) {
+            return null;
+        }
+        String email = (String) authentication.getPrincipal();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+        return user;
+    }
 }

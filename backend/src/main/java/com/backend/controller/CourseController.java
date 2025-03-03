@@ -5,6 +5,8 @@ import com.backend.dto.CourseSearchResponse;
 import com.backend.entity.Course;
 import com.backend.entity.CourseLevel;
 import com.backend.entity.Language;
+import com.backend.entity.User;
+import com.backend.service.AuthService;
 import com.backend.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,6 +24,9 @@ public class CourseController {
 
     @Autowired
     private CourseService courseService;
+
+    @Autowired
+    private AuthService authService;
 
     @GetMapping("/search")
     public List<CourseSearchResponse> findCourses(
@@ -51,7 +56,8 @@ public class CourseController {
 
     @PostMapping("/create")
     public ResponseEntity<Void> createCourse(@RequestBody CourseDto course, Authentication authentication) {
-        courseService.createCourse(course, authentication);
+        User currentUser = authService.getCurrentUser(authentication);
+        courseService.createCourse(course, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -69,7 +75,8 @@ public class CourseController {
 
     @GetMapping("/student/list")
     public ResponseEntity<List<CourseDto>> getCourseById(Authentication authentication) {
-        List<CourseDto> coursesByStudentId = courseService.findCoursesByStudentId(authentication);
+        User currentUser = authService.getCurrentUser(authentication);
+        List<CourseDto> coursesByStudentId = courseService.findCoursesByStudentId(currentUser);
         return ResponseEntity.ok(coursesByStudentId);
     }
 

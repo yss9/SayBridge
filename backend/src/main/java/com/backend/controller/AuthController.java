@@ -3,6 +3,7 @@ package com.backend.controller;
 import com.backend.dto.LoginRequest;
 import com.backend.dto.LoginResponse;
 import com.backend.dto.RegisterRequest;
+import com.backend.entity.User;
 import com.backend.service.AuthService;
 import com.backend.service.UserService;
 import com.backend.util.JwtTokenUtil;
@@ -75,7 +76,8 @@ public class AuthController {
 
     @PostMapping("/verify-password")
     public  ResponseEntity<Map<String, Object>> verifyPassword(Authentication authentication, @RequestBody LoginRequest request) {
-        Map<String, Object> results = userService.verifyPassword(authentication, request);
+        User currentUser = authService.getCurrentUser(authentication);
+        Map<String, Object> results = userService.verifyPassword(currentUser, request);
         return ResponseEntity.ok(results);
     }
 }
