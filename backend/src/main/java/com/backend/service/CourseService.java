@@ -2,13 +2,11 @@ package com.backend.service;
 
 import com.backend.dto.CourseDto;
 import com.backend.dto.CourseSearchResponse;
-import com.backend.dto.StudentCourseDto;
 import com.backend.entity.*;
 import com.backend.event.CourseCreatedEvent;
 import com.backend.repository.CourseRepository;
-import com.backend.repository.StudentCourseRepository;
+import com.backend.repository.CourseEnrollmentRepository;
 import com.backend.repository.TeacherProfileRepository;
-import com.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,10 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.Authentication;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,13 +28,10 @@ public class CourseService {
     private CourseRepository courseRepository;
 
     @Autowired
-    private EmailService emailService;
-
-    @Autowired
     private TeacherProfileRepository teacherProfileRepository;
 
     @Autowired
-    private StudentCourseRepository studentCourseRepository;
+    private CourseEnrollmentRepository courseEnrollmentRepository;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -109,10 +102,10 @@ public class CourseService {
     }
 
     public List<CourseDto> findCoursesByStudentId(User user) {
-        List<StudentCourse> studentCourses = studentCourseRepository.findByStudentId(user.getId());
+        List<CourseEnrollment> coursEnrollments = courseEnrollmentRepository.findByStudentId(user.getId());
 
-        return studentCourses.stream()
-                .map(studentCourse -> new CourseDto(studentCourse.getCourse()))
+        return coursEnrollments.stream()
+                .map(courseEnrollment -> new CourseDto(courseEnrollment.getCourse()))
                 .collect(Collectors.toList());
     }
 

@@ -16,18 +16,19 @@ public class CourseEnrollment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "student_id", nullable = false)
-    private User student;
-
-    @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
+    @ManyToOne
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
+
     @Column(nullable = false, updatable = false)
-    private LocalDateTime enrolledAt;
+    private LocalDateTime joinedAt;
 
     @PrePersist
     public void prePersist() {
-        this.enrolledAt = LocalDateTime.now();
+        this.joinedAt = LocalDateTime.now();
     }
+
 }

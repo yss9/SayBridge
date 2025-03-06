@@ -43,6 +43,7 @@ const Header = () => {
     const [profile, setProfile] = useState(null);
     const [error, setError] = useState('');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [role, setRole] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -51,6 +52,7 @@ const Header = () => {
             try{
                 const response = await userInfoApi.userInfo();
                 setProfile(response.data);
+                setRole(response.data.role)
                 setIsLoggedIn(true);
             } catch (err){
                 console.error("프로필가져오기 실패",err)
@@ -73,6 +75,10 @@ const Header = () => {
         navigate('/signin');
     }
 
+    const handleGoTeacherProfile = () => {
+        navigate("/teacherProfile");
+    };
+
     const handleLogout = async () => {
         try {
                 await authApi.logout();
@@ -84,6 +90,7 @@ const Header = () => {
         }
     };
 
+
     return (
         <HeaderContainer>
             <Logo onClick={handleGoHome}>SayBridge</Logo>
@@ -92,16 +99,18 @@ const Header = () => {
                     <>
                         <button onClick={handleGoHome}>Home</button>
                         <button onClick={handleGoMyPage}>My Page</button>
+
+                        {role === "TEACHER" && (
+                            <button onClick={handleGoTeacherProfile}>Teacher Profile</button>
+                        )}
+
                         <button onClick={handleLogout}>Logout</button>
                     </>
                 ) : (
                     <>
-                        <button onClick={handleGoLogin}>
-                            Sign In
-                        </button>
+                        <button onClick={handleGoLogin}>Sign In</button>
                         <button onClick={handleGoHome}>Home</button>
                     </>
-
                 )}
 
             </Nav>

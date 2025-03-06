@@ -24,7 +24,7 @@ public class UserService {
     public UserProfileResponse getUserProfile(User user) {
         if (user == null) return null;
 
-        UserProfileResponse profile = new UserProfileResponse(user.getEmail(), user.getUsername(), user.getNickname(), user.getProfileImageUrl());
+        UserProfileResponse profile = new UserProfileResponse(user.getEmail(), user.getUsername(), user.getNickname(), user.getProfileImageUrl(), user.getRole());
         return profile;
     }
 
