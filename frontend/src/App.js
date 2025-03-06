@@ -10,6 +10,7 @@ import MyPage from "./pages/MyPage";
 import TeacherProfile from "./pages/TeacherProfile";
 import FileUpload from "./pages/FileUpload";
 import RequestTest from "./pages/RequestTest";
+import ReviewTest from "./pages/ReviewTest";
 
 const App = () => {
     return (
@@ -23,8 +24,10 @@ const App = () => {
                 <Route path="/teacherprofile" element={<TeacherProfile />}/>
                 <Route path="/videochat" element={<VideoChat />} />
                 <Route path="/course" element={<Course />} />
+
                 <Route path="/file" element={<FileUpload/>}/>
-                <Route path="/test" element={<RequestTest/>}/>
+                <Route path="/reviewTest" element={<ReviewTest/>}/>
+                <Route path="/requestTest" element={<RequestTest/>}/>
             </Routes>
         </Router>
     );

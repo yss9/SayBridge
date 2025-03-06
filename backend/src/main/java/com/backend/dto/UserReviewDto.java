@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class UserReviewDto {
     private Long id;
+    private Long courseId;
     private String courseTitle;
     private int rating;
     private String content;

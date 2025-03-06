@@ -5,6 +5,7 @@ import Footer from '../component/Footer';
 import { userInfoApi } from "../api/userApi";
 import { uploadApi, authApi } from "../api/authApi";
 import { courseApi } from "../api/courseApi";
+import { reviewApi } from "../api/reviewApi";
 
 const PageContainer = styled.div`
     display: flex;
@@ -103,7 +104,7 @@ const SectionTitle = styled.h2`
 
 const SliderContainer = styled.div`
     position: relative;
-    width: 1000px;    /* ★ 고정 폭 ★ */
+    width: 1000px; /* 고정 폭 */
     margin: 0 auto;
     overflow: visible;
     box-sizing: border-box;
@@ -145,6 +146,20 @@ const CourseInfo = styled.div`
     color: #666;
 `;
 
+const ReviewButton = styled.button`
+    background: #007BFF;
+    color: #fff;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    &:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+`;
+
 const ArrowButton = styled.button`
     background: #000;
     color: #fff;
@@ -173,6 +188,14 @@ const RightArrow = styled(ArrowButton)`
     transform: translateY(-50%);
 `;
 
+const ReviewSliderContainer = styled.div`
+    position: relative;
+    width: 1000px; /* 고정 폭 */
+    margin: 0 auto;
+    overflow: visible;
+    box-sizing: border-box;
+`;
+
 const ReviewsSection = styled.section`
     width: 100%;
     max-width: 1000px;
@@ -186,6 +209,7 @@ const ReviewsList = styled.div`
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
+    justify-content: ${(props) => (props.$center ? 'center' : 'flex-start')};
 `;
 
 const ReviewCard = styled.div`
@@ -197,6 +221,7 @@ const ReviewCard = styled.div`
     display: flex;
     gap: 16px;
     align-items: flex-start;
+    position: relative;
 `;
 
 const ReviewPhoto = styled.div`
@@ -225,6 +250,17 @@ const ReviewRating = styled.div`
 const ReviewText = styled.div`
     font-size: 14px;
     color: #333;
+`;
+
+const DeleteButton = styled.button`
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: red;
+    cursor: pointer;
+    position: absolute;
+    top: 8px;
+    right: 8px;
 `;
 
 const ModalOverlay = styled.div`
@@ -329,6 +365,16 @@ const MyPage = () => {
     const [courses, setCourses] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
 
+    const [reviews, setReviews] = useState([]);
+    const [reviewsIndex, setReviewsIndex] = useState(0);
+    const [reviewMap, setReviewMap] = useState({});
+
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [currentCourseForReview, setCurrentCourseForReview] = useState(null);
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewContent, setReviewContent] = useState("");
+
+
     useEffect(() => {
         const fetchProfile = async () => {
             try {
@@ -346,6 +392,27 @@ const MyPage = () => {
         fetchProfile();
     }, []);
 
+    useEffect(() => {
+        const fetchMyReviews = async () => {
+            try {
+                const response = await reviewApi.getMyReview();
+                setReviews(response.data);
+            } catch (err) {
+                console.error("내 리뷰 가져오기 실패", err);
+            }
+        };
+        fetchMyReviews();
+    }, []);
+
+
+    useEffect(() => {
+        const newMap = {};
+        reviews.forEach((r) => {
+            newMap[r.courseId] = r;
+        });
+        setReviewMap(newMap);
+    }, [reviews]);
+
     const handlePrev = () => {
         setCurrentIndex(prev => Math.max(0, prev - 3));
     };
@@ -356,6 +423,47 @@ const MyPage = () => {
             return newIndex < courses.length ? newIndex : prev;
         });
     };
+
+    const handleReviewsPrev = () => {
+        setReviewsIndex(prev => Math.max(0, prev - 2));
+    };
+
+    const handleReviewsNext = () => {
+        setReviewsIndex(prev => {
+            const newIndex = prev + 2;
+            return newIndex < reviews.length ? newIndex : prev;
+        });
+    };
+
+    const openReviewModal = (course) => {
+        setCurrentCourseForReview(course);
+        setIsReviewModalOpen(true);
+    };
+
+    const closeReviewModal = () => {
+        setIsReviewModalOpen(false);
+        setCurrentCourseForReview(null);
+        setReviewRating(5);
+        setReviewContent("");
+    };
+
+    const handleSubmitReview = async (event) => {
+        event.preventDefault();
+        try {
+            await reviewApi.createReview({
+                courseId: currentCourseForReview.id,
+                rating: reviewRating,
+                content: reviewContent,
+            });
+
+            const response = await reviewApi.getMyReview();
+            setReviews(response.data);
+            closeReviewModal();
+        } catch (err) {
+            console.error("리뷰 작성 오류", err);
+        }
+    };
+
 
     const handleOpenEditModal = () => {
         setIsEditModalOpen(true);
@@ -437,12 +545,29 @@ const MyPage = () => {
         }
     };
 
-    // 코스가 3개 미만이면 가운데 정렬
+
     const isCenter = courses.length < 3;
 
-    // 화살표 비활성화 조건
+    const isReviewsCenter = reviews.length < 3;
+
     const disablePrev = currentIndex === 0 || courses.length <= 3;
     const disableNext = currentIndex + 3 >= courses.length || courses.length <= 3;
+
+    const disableReviewsPrev = reviewsIndex === 0 || reviews.length <= 2;
+    const disableReviewsNext = reviewsIndex + 2 >= reviews.length || reviews.length <= 2;
+
+    const renderStars = (rating) => {
+        return "★".repeat(rating) + "☆".repeat(5 - rating);
+    };
+
+    const handleDeleteReview = async (reviewId) => {
+        try {
+            await reviewApi.deleteReview(reviewId);
+            setReviews(prevReviews => prevReviews.filter(review => review.id !== reviewId));
+        } catch (err) {
+            console.error("리뷰 삭제 오류", err);
+        }
+    };
 
     return (
         <PageContainer>
@@ -468,51 +593,62 @@ const MyPage = () => {
                         <LeftArrow onClick={handlePrev} disabled={disablePrev}>
                             ◀
                         </LeftArrow>
-
                         <CoursesList $center={isCenter}>
-                            {courses.slice(currentIndex, currentIndex + 3).map(course => (
-                                <CourseCard key={course.id} id={`course-${course.id}`}>
-                                    <CourseImage />
-                                    <CourseName>{course.title}</CourseName>
-                                    <CourseInfo>Teacher: {course.teacherId}</CourseInfo>
-                                    <CourseInfo>Description: {course.description}</CourseInfo>
-                                    <CourseInfo>Max Students: {course.maxStudents}</CourseInfo>
-                                    <CourseInfo>Language: {course.language}</CourseInfo>
-                                    <CourseInfo>Level: {course.level}</CourseInfo>
-                                </CourseCard>
-                            ))}
-                        </CoursesList>
+                            {courses.slice(currentIndex, currentIndex + 3).map(course => {
+                                const hasReview = !!reviewMap[course.id];
+                                return (
+                                    <CourseCard key={course.id} id={`course-${course.id}`}>
+                                        <CourseImage />
+                                        <CourseName>{course.title}</CourseName>
+                                        <CourseInfo>Teacher: {course.teacherId}</CourseInfo>
+                                        <CourseInfo>Description: {course.description}</CourseInfo>
+                                        <CourseInfo>Max Students: {course.maxStudents}</CourseInfo>
+                                        <CourseInfo>Language: {course.language}</CourseInfo>
+                                        <CourseInfo>Level: {course.level}</CourseInfo>
 
+                                        {hasReview ? (
+                                            <ReviewButton disabled>작성완료</ReviewButton>
+                                        ) : (
+                                            <ReviewButton onClick={() => openReviewModal(course)}>리뷰작성</ReviewButton>
+                                        )}
+                                    </CourseCard>
+                                );
+                            })}
+                        </CoursesList>
                         <RightArrow onClick={handleNext} disabled={disableNext}>
                             ▶
                         </RightArrow>
                     </SliderContainer>
-
                 </CoursesSection>
+
+                {/* 리뷰 슬라이더 영역 (2개씩 표시) */}
                 <ReviewsSection>
                     <SectionTitle>User Reviews</SectionTitle>
-                    <ReviewsList>
-                        <ReviewCard>
-                            <ReviewPhoto />
-                            <ReviewContent>
-                                <ReviewerName>User1</ReviewerName>
-                                <ReviewRating>★★★★★</ReviewRating>
-                                <ReviewText>Great platform to learn!</ReviewText>
-                            </ReviewContent>
-                        </ReviewCard>
-                        <ReviewCard>
-                            <ReviewPhoto />
-                            <ReviewContent>
-                                <ReviewerName>User2</ReviewerName>
-                                <ReviewRating>★★★★☆</ReviewRating>
-                                <ReviewText>Enjoying the courses</ReviewText>
-                            </ReviewContent>
-                        </ReviewCard>
-                    </ReviewsList>
+                    <ReviewSliderContainer>
+                        <LeftArrow onClick={handleReviewsPrev} disabled={disableReviewsPrev}>
+                            ◀
+                        </LeftArrow>
+                        <ReviewsList $center={isReviewsCenter}>
+                            {reviews.slice(reviewsIndex, reviewsIndex + 2).map(review => (
+                                <ReviewCard key={review.id}>
+                                    <ReviewContent>
+                                        <ReviewerName>{review.courseTitle}</ReviewerName>
+                                        <ReviewRating>{renderStars(review.rating)}</ReviewRating>
+                                        <ReviewText>{review.content}</ReviewText>
+                                    </ReviewContent>
+                                    <DeleteButton onClick={() => handleDeleteReview(review.id)}>×</DeleteButton>
+                                </ReviewCard>
+                            ))}
+                        </ReviewsList>
+                        <RightArrow onClick={handleReviewsNext} disabled={disableReviewsNext}>
+                            ▶
+                        </RightArrow>
+                    </ReviewSliderContainer>
                 </ReviewsSection>
             </Main>
             <Footer />
 
+            {/* 프로필 수정 모달 */}
             {isEditModalOpen && (
                 <ModalOverlay onClick={handleCloseEditModal}>
                     <ModalContent onClick={(e) => e.stopPropagation()}>
@@ -567,6 +703,36 @@ const MyPage = () => {
                             />
                         </ModalFormGroup>
                         <SaveButton onClick={handleSaveChanges}>Save Changes</SaveButton>
+                    </ModalContent>
+                </ModalOverlay>
+            )}
+
+            {/* 리뷰 작성 모달 */}
+            {isReviewModalOpen && (
+                <ModalOverlay onClick={closeReviewModal}>
+                    <ModalContent onClick={(e) => e.stopPropagation()}>
+                        <CloseButton onClick={closeReviewModal}>×</CloseButton>
+                        <ModalTitle>리뷰 작성</ModalTitle>
+                        <ModalFormGroup>
+                            <Label>별점 (0~5)</Label>
+                            <Input
+                                type="number"
+                                min="0"
+                                max="5"
+                                value={reviewRating}
+                                onChange={(e) => setReviewRating(Number(e.target.value))}
+                            />
+                        </ModalFormGroup>
+                        <ModalFormGroup>
+                            <Label>리뷰 내용</Label>
+                            <Input
+                                type="text"
+                                value={reviewContent}
+                                onChange={(e) => setReviewContent(e.target.value)}
+                                placeholder="리뷰 내용을 입력하세요."
+                            />
+                        </ModalFormGroup>
+                        <SaveButton onClick={handleSubmitReview}>리뷰 저장</SaveButton>
                     </ModalContent>
                 </ModalOverlay>
             )}

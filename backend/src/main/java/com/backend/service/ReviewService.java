@@ -31,6 +31,7 @@ public class ReviewService {
                 .map(review -> {
                     UserReviewDto dto = new UserReviewDto();
                     dto.setId(review.getId());
+                    dto.setCourseId(review.getCourse().getId());
                     dto.setCourseTitle(review.getCourse().getTitle());
                     dto.setRating(review.getRating());
                     dto.setContent(review.getContent());

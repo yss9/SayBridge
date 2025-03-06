@@ -380,7 +380,7 @@ const IntroducePage = () => {
     };
 
     const handleGoCourse  = () => {
-       navigate('/home');
+       navigate('/courseList');
     };
 
     return (
