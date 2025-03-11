@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import styled from 'styled-components';
 import {authApi} from "../api/authApi";
 import {userInfoApi} from "../api/userApi";
 import {useNavigate} from "react-router-dom";
+import {AuthContext} from "../context/AuthContext";
 
 const HeaderContainer = styled.header`
     display: flex;
@@ -40,28 +41,11 @@ const Nav = styled.nav`
 `;
 
 const Header = () => {
-    const [profile, setProfile] = useState(null);
-    const [error, setError] = useState('');
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [role, setRole] = useState('');
     const navigate = useNavigate();
+    const { user, setUser } = useContext(AuthContext);
+    const isLoggedIn = !!user;
+    const role = user?.role || '';
 
-    useEffect(() => {
-
-        const fetchProfile = async () =>{
-            try{
-                const response = await userInfoApi.userInfo();
-                setProfile(response.data);
-                setRole(response.data.role)
-                setIsLoggedIn(true);
-            } catch (err){
-                console.error("프로필가져오기 실패",err)
-                setError('프로필 가져오기 실패');
-            }
-
-        };
-        fetchProfile();
-    }, []);
 
     const handleGoHome = () =>{
         navigate('/');
@@ -82,8 +66,7 @@ const Header = () => {
     const handleLogout = async () => {
         try {
                 await authApi.logout();
-                setProfile(null)
-                setIsLoggedIn(false);
+                setUser(null);
                 navigate('/signin');
         } catch (error) {
             console.error("로그아웃 실패:", error);

@@ -33,6 +33,7 @@ public class CourseRepositoryImpl implements CourseRepositoryCustom {
                 .select(Projections.constructor(
                         CourseSearchResponse.class,
                         course.id,
+                        course.teacher.id,
                         user.nickname,
                         course.title,
                         course.level.stringValue(),

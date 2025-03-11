@@ -23,11 +23,11 @@ public class TeacherProfile {
     @Enumerated(EnumType.STRING)
     private Language language;
 
-    @Column(length = 255)
+    @Column(length = 1000)
     private String description;
 
-    @Column(length = 1000)
-    private String bio;
+    @Column(length = 150)
+    private String tag;
 
     @Column(length = 255)
     private String imageUrl;

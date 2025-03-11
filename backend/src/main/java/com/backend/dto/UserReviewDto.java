@@ -11,5 +11,5 @@ public class UserReviewDto {
     private String courseTitle;
     private int rating;
     private String content;
-
+    private String userNickname;
 }

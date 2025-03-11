@@ -16,6 +16,7 @@ public class CourseDto {
 
     private Long id;
     private Long teacherId;
+    private String teacherName;
     private String title;
     private String description;
     private Integer maxStudents;
@@ -26,6 +27,7 @@ public class CourseDto {
     public CourseDto(Course course) {
         this.id = course.getId();
         this.teacherId = course.getTeacher().getId();
+        this.teacherName = course.getTeacher().getUser().getUsername();
         this.title = course.getTitle();
         this.description = course.getDescription();
         this.maxStudents = course.getMaxStudents();

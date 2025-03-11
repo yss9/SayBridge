@@ -51,4 +51,9 @@ public class ReviewController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/teacher/{teacherId}")
+    public ResponseEntity<List<UserReviewDto>> getReviewByTeacher(@PathVariable Long teacherId) {
+        List<UserReviewDto> reviewByTeacherId = reviewService.getReviewByTeacherId(teacherId);
+        return ResponseEntity.ok(reviewByTeacherId);
+    }
 }

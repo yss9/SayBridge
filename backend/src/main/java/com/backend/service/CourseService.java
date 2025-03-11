@@ -102,11 +102,18 @@ public class CourseService {
     }
 
     public List<CourseDto> findCoursesByStudentId(User user) {
-        List<CourseEnrollment> coursEnrollments = courseEnrollmentRepository.findByStudentId(user.getId());
+        List<CourseEnrollment> courseEnrollments = courseEnrollmentRepository.findByStudentId(user.getId());
 
-        return coursEnrollments.stream()
+        return courseEnrollments.stream()
                 .map(courseEnrollment -> new CourseDto(courseEnrollment.getCourse()))
                 .collect(Collectors.toList());
+    }
+
+    public List<CourseDto> findCoursesByTeacher(Long teacherId) {
+        return courseRepository.findAllByTeacherId(teacherId).stream()
+                .map(CourseDto::new)
+                .collect(Collectors.toList());
+
     }
 
 

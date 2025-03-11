@@ -10,6 +10,7 @@ import lombok.Setter;
 public class CourseSearchResponse {
 
     private Long id;
+    private Long teacherId;
     private String teacherName;
     private String title;
     private String level;

@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
 import {courseApi} from "../api/courseApi";
+import {AuthContext} from "../context/AuthContext";
 
 const Container = styled.div`
     display: flex;
@@ -363,18 +364,18 @@ const CourseDetails = styled.div`
 const IntroducePage = () => {
     const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
+    const { user, setUser } = useContext(AuthContext);
 
     useEffect(() => {
         courseApi.getCourses(0, 3)
             .then(response => {
-                // 서버 응답이 Page 객체라면 content 배열에 실제 코스 데이터가 있음
                 setCourses(response.data.content);
             })
             .catch(error => {
                 console.error('Failed to fetch courses', error);
             });
     }, []);
-
+    console.log(user);
     const handleGoLogin = () => {
         navigate('/signin');
     };

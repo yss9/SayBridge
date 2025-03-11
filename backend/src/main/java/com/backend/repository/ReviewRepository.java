@@ -13,4 +13,5 @@ public interface ReviewRepository extends CrudRepository<Review,Long> {
 
     List<Review> findAllByCourseId(Long courseId);
 
+    List<Review> findByCourseTeacherId(Long teacherId);
 }

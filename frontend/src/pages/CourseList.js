@@ -277,7 +277,6 @@ const CourseList = () => {
             .catch(error => console.error('Failed to load more courses', error))
             .finally(() => setLoading(false));
     };
-
     return (
         <PageContainer>
             <Header />
@@ -343,7 +342,12 @@ const CourseList = () => {
                             {featuredCourses.map(course => (
                                 <CourseCard key={course.id}>
                                     <CourseTitle>{course.title}</CourseTitle>
-                                    <CourseInfo><strong>Teacher:</strong> {course.teacherId}</CourseInfo>
+                                    <CourseInfo key={course.teacherId}>
+                                        <strong>Teacher:</strong>
+                                        <a href={`/teacher/${course.teacherId}`} style={{ textDecoration: 'none', color: 'blue' }}>
+                                            {course.teacherName}
+                                        </a>
+                                    </CourseInfo>
                                     <CourseInfo><strong>Description:</strong> {course.description}</CourseInfo>
                                     <CourseInfo><strong>Max Students:</strong> {course.maxStudents}</CourseInfo>
                                     <CourseInfo><strong>Language:</strong> {course.language}</CourseInfo>
@@ -362,7 +366,12 @@ const CourseList = () => {
                                 {searchCourses.map(course => (
                                     <CourseCard key={course.id}>
                                         <CourseTitle>{course.title}</CourseTitle>
-                                        <CourseInfo><strong>Teacher:</strong> {course.teacherName}</CourseInfo>
+                                        <CourseInfo>
+                                            <strong>Teacher:</strong>
+                                            <a href={`/teacher/${course.teacherId}`} style={{ textDecoration: 'none', color: 'blue' }}>
+                                                {course.teacherName}
+                                            </a>
+                                        </CourseInfo>
                                         <CourseInfo><strong>Description:</strong> {course.description}</CourseInfo>
                                         <CourseInfo><strong>Max Students:</strong> {course.maxStudents}</CourseInfo>
                                         <CourseInfo><strong>Language:</strong> {course.language}</CourseInfo>

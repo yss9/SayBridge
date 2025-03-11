@@ -14,7 +14,8 @@ public class TeacherProfileDto {
 
     private Long id;
     private Long userId;
-    private String bio;
+    private String teacherName;
+    private String tag;
     private String description;
     private String imageUrl;
     private Language language;
@@ -22,7 +23,8 @@ public class TeacherProfileDto {
     public TeacherProfileDto(TeacherProfile teacherProfile) {
         this.id = teacherProfile.getId();
         this.userId = teacherProfile.getUser().getId();
-        this.bio = teacherProfile.getBio();
+        this.teacherName = teacherProfile.getUser().getUsername();
+        this.tag = teacherProfile.getTag();
         this.description = teacherProfile.getDescription();
         this.imageUrl = teacherProfile.getImageUrl();
         this.language = teacherProfile.getLanguage();

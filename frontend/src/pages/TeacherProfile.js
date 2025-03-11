@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
+
+import { teacherApi } from '../api/userApi';
+import { courseApi } from '../api/courseApi';
+import { reviewApi } from '../api/reviewApi';
+import { AuthContext } from "../context/AuthContext";
 
 const PageContainer = styled.div`
     display: flex;
@@ -37,10 +43,12 @@ const TeacherInfo = styled.div`
     gap: 20px;
 `;
 
+// teacherImage가 있으면 해당 URL을 배경 이미지로 사용합니다.
 const TeacherPhoto = styled.div`
     width: 120px;
     height: 120px;
-    background: #ccc;
+    background: ${props => props.imageUrl ? `url(${props.imageUrl}) no-repeat center center` : '#ccc'};
+    background-size: cover;
     border-radius: 100%;
 `;
 
@@ -141,7 +149,7 @@ const CourseDesc = styled.span`
     color: #666;
 `;
 
-const TeacherReviewSection = styled.section`
+const ReviewsSection = styled.section`
     width: 100%;
     max-width: 1000px;
     padding: 40px 20px;
@@ -150,14 +158,51 @@ const TeacherReviewSection = styled.section`
     gap: 20px;
 `;
 
-const ReviewsGrid = styled.div`
+const ReviewSliderContainer = styled.div`
+    position: relative;
+    width: 1000px;
+    margin: 0 auto;
+    overflow: visible;
+    box-sizing: border-box;
+`;
+
+const ReviewsList = styled.div`
     display: flex;
     gap: 20px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    justify-content: ${props => props.$center ? 'center' : 'flex-start'};
+`;
+
+const ArrowButton = styled.button`
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    &:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+`;
+
+const LeftArrow = styled(ArrowButton)`
+    position: absolute;
+    left: -6%;
+    top: 50%;
+    transform: translateY(-50%);
+`;
+
+const RightArrow = styled(ArrowButton)`
+    position: absolute;
+    right: -5%;
+    top: 50%;
+    transform: translateY(-50%);
 `;
 
 const ReviewCard = styled.div`
-    flex: 1 1 280px;
+    flex: 1 1 200px;
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -177,7 +222,7 @@ const ReviewPhoto = styled.div`
 const ReviewContent = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 `;
 
 const ReviewerName = styled.div`
@@ -185,119 +230,79 @@ const ReviewerName = styled.div`
     font-size: 14px;
 `;
 
-const ReviewerText = styled.div`
+const ReviewRating = styled.div`
+    font-size: 14px;
+    color: #f5c518;
+`;
+
+const ReviewText = styled.div`
     font-size: 14px;
     color: #333;
 `;
 
-const ModalOverlay = styled.div`
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-`;
-
-const ModalContent = styled.div`
-    background: #fff;
-    border-radius: 8px;
-    width: 400px;
-    padding: 24px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-`;
-
-const CloseButton = styled.button`
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    font-size: 20px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    &:hover {
-        color: #888;
-    }
-`;
-
-const ModalTitle = styled.h3`
-    margin: 0;
-    font-size: 20px;
-`;
-
-const FormGroup = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-`;
-
-const Label = styled.label`
-    font-size: 14px;
-    font-weight: bold;
-`;
-
-const Input = styled.input`
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-`;
-
-const Textarea = styled.textarea`
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    resize: vertical;
-`;
-
-const SaveButton = styled.button`
-    background: #000;
-    color: #fff;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    align-self: flex-end;
-    cursor: pointer;
-    &:hover {
-        background: #333;
-    }
-`;
-
 const TeacherProfile = () => {
-    const [isOwner] = useState(true);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const { teacherId } = useParams();
+    const [teacherName, setTeacherName] = useState('');
+    const [tagString, setTagString] = useState('');
+    const [teacherDescription, setTeacherDescription] = useState('');
+    const [teacherLanguage, setTeacherLanguage] = useState('');
+    const [teacherImage, setTeacherImage] = useState('');
+    const [teacherUserId, setTeacherUserId] = useState('');
+    const [courses, setCourses] = useState([]);
+    const [reviews, setReviews] = useState([]);
+    const [reviewsIndex, setReviewsIndex] = useState(0);
+    const { user } = useContext(AuthContext);
 
-    const [teacherName, setTeacherName] = useState('Teacher Name');
-    const [tagString, setTagString] = useState('Math Teacher,Science Lover');
-    const [teacherLanguage, setTeacherLanguage] = useState('English');
-    const [teacherLevel, setTeacherLevel] = useState('Advanced');
-    const [teacherDescription, setTeacherDescription] = useState('Passionate about educating young minds');
+    const isOwner = user && teacherUserId && (teacherUserId.toString() === user.id.toString());
 
-    const handleOpenEditModal = () => {
-        setIsEditModalOpen(true);
+    useEffect(() => {
+        if (!teacherId) return;
+
+        teacherApi.teacherInfo(teacherId)
+            .then((res) => {
+                const data = res.data;
+                setTeacherName(data.teacherName || 'Teacher Name');
+                setTagString(data.tag || '');
+                setTeacherDescription(data.description || '');
+                setTeacherLanguage(data.language || '');
+                setTeacherImage(data.imageUrl || '');
+                setTeacherUserId(data.userId || '');
+            })
+            .catch((err) => console.error('Teacher info fetch error:', err));
+
+        courseApi.getCourseByTeacherId(teacherId)
+            .then((res) => {
+                setCourses(res.data);
+            })
+            .catch((err) => console.error('Teacher courses fetch error:', err));
+
+        reviewApi.getTeacherReview(teacherId)
+            .then((res) => {
+                setReviews(res.data);
+            })
+            .catch((err) => console.error('Teacher reviews fetch error:', err));
+    }, [teacherId]);
+
+    const handleReviewsPrev = () => {
+        setReviewsIndex(prev => Math.max(0, prev - 2));
     };
-    const handleCloseEditModal = () => {
-        setIsEditModalOpen(false);
+
+    const handleReviewsNext = () => {
+        setReviewsIndex(prev => {
+            const newIndex = prev + 2;
+            return newIndex < reviews.length ? newIndex : prev;
+        });
     };
 
-    const handleSave = () => {
-        // API 호출 등을 통해 서버에 변경사항을 반영
-        setIsEditModalOpen(false);
+    const isReviewsCenter = reviews.length < 3;
+    const disableReviewsPrev = reviewsIndex === 0 || reviews.length <= 2;
+    const disableReviewsNext = reviewsIndex + 2 >= reviews.length || reviews.length <= 2;
+
+    const renderStars = (rating) => {
+        return "★".repeat(rating) + "☆".repeat(5 - rating);
     };
 
-    const tagArray = tagString
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0);
+    const tagArray = tagString.split(',').map(tag => tag.trim()).filter(tag => tag);
 
     return (
         <PageContainer>
@@ -305,7 +310,7 @@ const TeacherProfile = () => {
             <Main>
                 <ProfileSection>
                     <TeacherInfo>
-                        <TeacherPhoto />
+                        <TeacherPhoto imageUrl={teacherImage} />
                         <TeacherDetails>
                             <TeacherName>{teacherName}</TeacherName>
                             <TagContainer>
@@ -317,112 +322,48 @@ const TeacherProfile = () => {
                         </TeacherDetails>
                     </TeacherInfo>
                     {isOwner && (
-                        <EditProfileButton onClick={handleOpenEditModal}>
-                            Edit Profile
-                        </EditProfileButton>
+                        <EditProfileButton>Edit Profile</EditProfileButton>
                     )}
                 </ProfileSection>
 
                 <CoursesSection>
                     <SectionTitle>Teacher's Courses</SectionTitle>
                     <CoursesGrid>
-                        <CourseCard>
-                            <CourseImage />
-                            <CourseText>
-                                <CourseName>Algebra 101</CourseName>
-                                <CourseDesc>Basic Algebra for Beginners</CourseDesc>
-                            </CourseText>
-                        </CourseCard>
-                        <CourseCard>
-                            <CourseImage />
-                            <CourseText>
-                                <CourseName>Physics Fundamentals</CourseName>
-                                <CourseDesc>Newton's Laws & More</CourseDesc>
-                            </CourseText>
-                        </CourseCard>
+                        {courses.map(course => (
+                            <CourseCard key={course.id}>
+                                <CourseText>
+                                    <CourseName>{course.title}</CourseName>
+                                    <CourseDesc>{course.description}</CourseDesc>
+                                </CourseText>
+                            </CourseCard>
+                        ))}
                     </CoursesGrid>
                 </CoursesSection>
 
-                <TeacherReviewSection>
+                <ReviewsSection>
                     <SectionTitle>Reviews from Students</SectionTitle>
-                    <ReviewsGrid>
-                        <ReviewCard>
-                            <ReviewPhoto />
-                            <ReviewContent>
-                                <ReviewerName>Student1</ReviewerName>
-                                <ReviewerText>
-                                    Great explanations, really helped me understand Algebra.
-                                </ReviewerText>
-                            </ReviewContent>
-                        </ReviewCard>
-                        <ReviewCard>
-                            <ReviewPhoto />
-                            <ReviewContent>
-                                <ReviewerName>Student2</ReviewerName>
-                                <ReviewerText>
-                                    Enjoyed the interactive experiments in Physics class!
-                                </ReviewerText>
-                            </ReviewContent>
-                        </ReviewCard>
-                    </ReviewsGrid>
-                </TeacherReviewSection>
+                    <ReviewSliderContainer>
+                        <LeftArrow onClick={handleReviewsPrev} disabled={disableReviewsPrev}>
+                            ◀
+                        </LeftArrow>
+                        <ReviewsList $center={isReviewsCenter}>
+                            {reviews.slice(reviewsIndex, reviewsIndex + 2).map(review => (
+                                <ReviewCard key={review.id}>
+                                    <ReviewContent>
+                                        <ReviewerName>{review.userNickname}</ReviewerName>
+                                        <ReviewRating>{renderStars(review.rating)}</ReviewRating>
+                                        <ReviewText>{review.content}</ReviewText>
+                                    </ReviewContent>
+                                </ReviewCard>
+                            ))}
+                        </ReviewsList>
+                        <RightArrow onClick={handleReviewsNext} disabled={disableReviewsNext}>
+                            ▶
+                        </RightArrow>
+                    </ReviewSliderContainer>
+                </ReviewsSection>
             </Main>
             <Footer />
-
-            {isEditModalOpen && (
-                <ModalOverlay onClick={handleCloseEditModal}>
-                    <ModalContent onClick={(e) => e.stopPropagation()}>
-                        <CloseButton onClick={handleCloseEditModal}>×</CloseButton>
-                        <ModalTitle>Edit Profile</ModalTitle>
-                        <FormGroup>
-                            <Label htmlFor="teacherName">Name</Label>
-                            <Input
-                                id="teacherName"
-                                type="text"
-                                value={teacherName}
-                                onChange={(e) => setTeacherName(e.target.value)}
-                            />
-                        </FormGroup>
-                        <FormGroup>
-                            <Label htmlFor="tagString">Name Tags (comma-separated)</Label>
-                            <Input
-                                id="tagString"
-                                type="text"
-                                value={tagString}
-                                onChange={(e) => setTagString(e.target.value)}
-                            />
-                        </FormGroup>
-                        <FormGroup>
-                            <Label htmlFor="teacherLanguage">Language</Label>
-                            <Input
-                                id="teacherLanguage"
-                                type="text"
-                                value={teacherLanguage}
-                                onChange={(e) => setTeacherLanguage(e.target.value)}
-                            />
-                        </FormGroup>
-                        <FormGroup>
-                            <Label htmlFor="teacherLevel">Level</Label>
-                            <Input
-                                id="teacherLevel"
-                                type="text"
-                                value={teacherLevel}
-                                onChange={(e) => setTeacherLevel(e.target.value)}
-                            />
-                        </FormGroup>
-                        <FormGroup>
-                            <Label htmlFor="teacherDescription">Self Introduction</Label>
-                            <Textarea
-                                id="teacherDescription"
-                                rows="3"
-                                value={teacherDescription}
-                                onChange={(e) => setTeacherDescription(e.target.value)}
-                            />
-                        </FormGroup>
-                        <SaveButton onClick={handleSave}>Save Changes</SaveButton>
-                    </ModalContent>
-                </ModalOverlay>
-            )}
         </PageContainer>
     );
 };

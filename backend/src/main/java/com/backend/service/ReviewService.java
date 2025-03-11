@@ -67,4 +67,19 @@ public class ReviewService {
         reviewRepository.deleteById(reviewId);
     }
 
+    public List<UserReviewDto> getReviewByTeacherId(Long teacherId) {
+        List<Review> byCourseTeacherId = reviewRepository.findByCourseTeacherId(teacherId);
+        return byCourseTeacherId.stream()
+                .map(review -> {
+                    UserReviewDto dto = new UserReviewDto();
+                    dto.setId(review.getId());
+                    dto.setUserNickname(review.getUser().getNickname());
+                    dto.setCourseId(review.getCourse().getId());
+                    dto.setCourseTitle(review.getCourse().getTitle());
+                    dto.setRating(review.getRating());
+                    dto.setContent(review.getContent());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 }

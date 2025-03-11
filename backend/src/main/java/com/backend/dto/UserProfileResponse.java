@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class UserProfileResponse {
+    private Long id;
     private String email;
     private String username;
     private String nickname;

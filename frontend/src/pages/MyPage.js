@@ -375,6 +375,7 @@ const MyPage = () => {
     const [reviewContent, setReviewContent] = useState("");
 
 
+
     useEffect(() => {
         const fetchProfile = async () => {
             try {

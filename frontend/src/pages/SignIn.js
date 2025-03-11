@@ -1,9 +1,11 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import styled from 'styled-components';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
 import {useNavigate} from "react-router-dom";
 import {authApi} from "../api/authApi";
+import {userInfoApi} from "../api/userApi";
+import {AuthContext} from "../context/AuthContext";
 
 const PageContainer = styled.div`
     display: flex;
@@ -186,13 +188,16 @@ const SignInPage = () => {
     const navigate = useNavigate();
     const [email, setEmail] =useState('');
     const [password, setPassword] = useState('');
+    const { user, setUser } = useContext(AuthContext);
 
     const handleNaverLogin = () => {
         window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+
     };
 
     const handleKakaoLogin = () => {
         window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
+
     };
 
     const handleGoogleLogin = () => {
@@ -204,6 +209,8 @@ const SignInPage = () => {
         const userData = {email, password};
         try {
             await authApi.login(userData);
+            const response = await userInfoApi.userInfo();
+            setUser(response.data);
             alert('로그인 성공');
             navigate('/')
 
