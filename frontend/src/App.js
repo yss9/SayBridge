@@ -25,7 +25,7 @@ const App = () => {
                     <Route path="/mypage" element={<MyPage />} />
                     <Route path="/teacherprofile" element={<TeacherProfile />}/>
                     <Route path="/videochat" element={<VideoChat />} />
-                    <Route path="/course" element={<Course />} />
+                    <Route path="/course/:courseId" element={<Course />} />
                     <Route path="/teacher/:teacherId" element={<TeacherProfile />} />
 
                     <Route path="/file" element={<FileUpload/>}/>

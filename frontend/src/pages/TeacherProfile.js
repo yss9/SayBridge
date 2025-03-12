@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
@@ -7,8 +7,11 @@ import Footer from '../component/Footer';
 import { teacherApi } from '../api/userApi';
 import { courseApi } from '../api/courseApi';
 import { reviewApi } from '../api/reviewApi';
+import { uploadApi } from '../api/authApi';
+import { userInfoApi } from '../api/userApi';
 import { AuthContext } from "../context/AuthContext";
 
+// 기존 스타일들
 const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -43,7 +46,6 @@ const TeacherInfo = styled.div`
     gap: 20px;
 `;
 
-// teacherImage가 있으면 해당 URL을 배경 이미지로 사용합니다.
 const TeacherPhoto = styled.div`
     width: 120px;
     height: 120px;
@@ -142,6 +144,11 @@ const CourseText = styled.div`
 const CourseName = styled.h3`
     font-size: 16px;
     margin: 0;
+    color: #007bff;
+    cursor: pointer;
+    &:hover {
+        text-decoration: underline;
+    }
 `;
 
 const CourseDesc = styled.span`
@@ -240,6 +247,80 @@ const ReviewText = styled.div`
     color: #333;
 `;
 
+// 모달창 스타일
+const ModalOverlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+
+const ModalContent = styled.div`
+    background: #fff;
+    padding: 20px;
+    border-radius: 6px;
+    width: 400px;
+    max-width: 90%;
+`;
+
+const FormGroup = styled.div`
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+`;
+
+const Label = styled.label`
+    margin-bottom: 4px;
+    font-size: 14px;
+`;
+
+const Input = styled.input`
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+`;
+
+const TextArea = styled.textarea`
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+`;
+
+const Select = styled.select`
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+`;
+
+const SaveButton = styled.button`
+    padding: 10px 20px;
+    background: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 8px;
+`;
+
+const CancelButton = styled.button`
+    padding: 10px 20px;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+`;
+
 const TeacherProfile = () => {
     const { teacherId } = useParams();
     const [teacherName, setTeacherName] = useState('');
@@ -252,6 +333,15 @@ const TeacherProfile = () => {
     const [reviews, setReviews] = useState([]);
     const [reviewsIndex, setReviewsIndex] = useState(0);
     const { user } = useContext(AuthContext);
+
+    // 모달 상태 및 폼 필드 상태
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [newLanguage, setNewLanguage] = useState(teacherLanguage);
+    const [newDescription, setNewDescription] = useState(teacherDescription);
+    const [newTag, setNewTag] = useState(tagString);
+    const [file, setFile] = useState(null);
+    const [message, setMessage] = useState('');
+    const [pwError, setPwError] = useState('');
 
     const isOwner = user && teacherUserId && (teacherUserId.toString() === user.id.toString());
 
@@ -267,6 +357,11 @@ const TeacherProfile = () => {
                 setTeacherLanguage(data.language || '');
                 setTeacherImage(data.imageUrl || '');
                 setTeacherUserId(data.userId || '');
+
+                // 모달 폼의 초기값 설정
+                setNewLanguage(data.language || '');
+                setNewDescription(data.description || '');
+                setNewTag(data.tag || '');
             })
             .catch((err) => console.error('Teacher info fetch error:', err));
 
@@ -304,6 +399,52 @@ const TeacherProfile = () => {
 
     const tagArray = tagString.split(',').map(tag => tag.trim()).filter(tag => tag);
 
+    // 모달 열기/닫기
+    const handleOpenEditModal = () => setShowEditModal(true);
+    const handleCloseEditModal = () => {
+        setShowEditModal(false);
+        setMessage('');
+        setPwError('');
+    };
+
+    // 프로필 업데이트 핸들러
+    const handleSaveChanges = async (event) => {
+        event.preventDefault();
+        let updateFileUrl = teacherImage;
+        if (file) {
+            try {
+                const response = await uploadApi.fileUpload(file);
+                setMessage(`파일 업로드 성공: ${response.data}`);
+                updateFileUrl = response.data;
+            } catch (error) {
+                setMessage(`업로드 실패: ${error.response?.data || error.message}`);
+                return;
+            }
+        }
+
+        const updateData = {
+            language: newLanguage,
+            description: newDescription,
+            tag: newTag,
+            imageUrl: updateFileUrl
+        };
+
+        try {
+            // userInfoApi.updateUserProfile API를 통해 프로필 업데이트
+            await userInfoApi.updateUserProfile(updateData);
+            setMessage("프로필이 성공적으로 업데이트되었습니다.");
+            // 업데이트 후, 현재 페이지의 정보를 새로고침
+            setTeacherLanguage(newLanguage);
+            setTeacherDescription(newDescription);
+            setTagString(newTag);
+            setTeacherImage(updateFileUrl);
+            handleCloseEditModal();
+        } catch (err) {
+            console.error("프로필 업데이트 오류", err);
+            setPwError("프로필 업데이트 중 오류가 발생했습니다.");
+        }
+    };
+
     return (
         <PageContainer>
             <Header />
@@ -322,7 +463,7 @@ const TeacherProfile = () => {
                         </TeacherDetails>
                     </TeacherInfo>
                     {isOwner && (
-                        <EditProfileButton>Edit Profile</EditProfileButton>
+                        <EditProfileButton onClick={handleOpenEditModal}>Edit Profile</EditProfileButton>
                     )}
                 </ProfileSection>
 
@@ -332,7 +473,9 @@ const TeacherProfile = () => {
                         {courses.map(course => (
                             <CourseCard key={course.id}>
                                 <CourseText>
-                                    <CourseName>{course.title}</CourseName>
+                                    <Link to={`/course/${course.id}`} style={{ textDecoration: 'none' }}>
+                                        <CourseName>{course.title}</CourseName>
+                                    </Link>
                                     <CourseDesc>{course.description}</CourseDesc>
                                 </CourseText>
                             </CourseCard>
@@ -364,6 +507,65 @@ const TeacherProfile = () => {
                 </ReviewsSection>
             </Main>
             <Footer />
+
+            {showEditModal && (
+                <ModalOverlay>
+                    <ModalContent>
+                        <h2>Edit Profile</h2>
+                        <form onSubmit={handleSaveChanges}>
+                            <FormGroup>
+                                <Label htmlFor="language">Language</Label>
+                                <Select
+                                    id="language"
+                                    value={newLanguage}
+                                    onChange={(e) => setNewLanguage(e.target.value)}
+                                >
+                                    <option value="">Select Language</option>
+                                    <option value="ENGLISH">ENGLISH</option>
+                                    <option value="KOREAN">KOREAN</option>
+                                    <option value="JAPANESE">JAPANESE</option>
+                                    <option value="CHINESE">CHINESE</option>
+                                    <option value="SPANISH">SPANISH</option>
+                                    <option value="FRENCH">FRENCH</option>
+                                </Select>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label htmlFor="description">Description</Label>
+                                <TextArea
+                                    id="description"
+                                    rows="4"
+                                    value={newDescription}
+                                    onChange={(e) => setNewDescription(e.target.value)}
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label htmlFor="tag">Tag (쉼표로 구분)</Label>
+                                <Input
+                                    id="tag"
+                                    type="text"
+                                    value={newTag}
+                                    onChange={(e) => setNewTag(e.target.value)}
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label htmlFor="file">Profile Image</Label>
+                                <Input
+                                    id="file"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setFile(e.target.files[0])}
+                                />
+                            </FormGroup>
+                            {message && <p>{message}</p>}
+                            {pwError && <p style={{ color: 'red' }}>{pwError}</p>}
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <SaveButton type="submit">Save Changes</SaveButton>
+                                <CancelButton type="button" onClick={handleCloseEditModal}>Cancel</CancelButton>
+                            </div>
+                        </form>
+                    </ModalContent>
+                </ModalOverlay>
+            )}
         </PageContainer>
     );
 };
