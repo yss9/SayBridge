@@ -106,9 +106,32 @@ const CoursesSection = styled.section`
     gap: 20px;
 `;
 
+const CoursesHeader = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`;
+
 const SectionTitle = styled.h2`
     font-size: 24px;
     margin: 0;
+`;
+
+const CreateCourseButton = styled.button`
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #000;
+    color: #fff;
+    font-size: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &:hover {
+        background: #333;
+    }
 `;
 
 const CoursesGrid = styled.div`
@@ -247,7 +270,7 @@ const ReviewText = styled.div`
     color: #333;
 `;
 
-// 모달창 스타일
+// 모달창 스타일 (기존 Edit 모달과 동일)
 const ModalOverlay = styled.div`
     position: fixed;
     top: 0;
@@ -334,7 +357,7 @@ const TeacherProfile = () => {
     const [reviewsIndex, setReviewsIndex] = useState(0);
     const { user } = useContext(AuthContext);
 
-    // 모달 상태 및 폼 필드 상태
+    // 모달 상태 및 폼 필드 상태 (프로필 수정)
     const [showEditModal, setShowEditModal] = useState(false);
     const [newLanguage, setNewLanguage] = useState(teacherLanguage);
     const [newDescription, setNewDescription] = useState(teacherDescription);
@@ -342,6 +365,15 @@ const TeacherProfile = () => {
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState('');
     const [pwError, setPwError] = useState('');
+
+    // Course 생성 모달 상태 및 폼 필드 상태
+    const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
+    const [newCourseTitle, setNewCourseTitle] = useState('');
+    const [newCourseDescription, setNewCourseDescription] = useState('');
+    const [newCourseMaxStudents, setNewCourseMaxStudents] = useState('');
+    const [newCourseLanguage, setNewCourseLanguage] = useState('');
+    const [newCourseLevel, setNewCourseLevel] = useState('');
+    const [courseMessage, setCourseMessage] = useState('');
 
     const isOwner = user && teacherUserId && (teacherUserId.toString() === user.id.toString());
 
@@ -399,12 +431,25 @@ const TeacherProfile = () => {
 
     const tagArray = tagString.split(',').map(tag => tag.trim()).filter(tag => tag);
 
-    // 모달 열기/닫기
+    // 프로필 수정 모달 열기/닫기
     const handleOpenEditModal = () => setShowEditModal(true);
     const handleCloseEditModal = () => {
         setShowEditModal(false);
         setMessage('');
         setPwError('');
+    };
+
+    // Course 생성 모달 열기/닫기
+    const handleOpenCreateCourseModal = () => setShowCreateCourseModal(true);
+    const handleCloseCreateCourseModal = () => {
+        setShowCreateCourseModal(false);
+        // 폼 필드 초기화
+        setNewCourseTitle('');
+        setNewCourseDescription('');
+        setNewCourseMaxStudents('');
+        setNewCourseLanguage('');
+        setNewCourseLevel('');
+        setCourseMessage('');
     };
 
     // 프로필 업데이트 핸들러
@@ -430,18 +475,40 @@ const TeacherProfile = () => {
         };
 
         try {
-            // userInfoApi.updateUserProfile API를 통해 프로필 업데이트
-            await userInfoApi.updateUserProfile(updateData);
+            await teacherApi.updateTeacherProfile(updateData);
             setMessage("프로필이 성공적으로 업데이트되었습니다.");
-            // 업데이트 후, 현재 페이지의 정보를 새로고침
             setTeacherLanguage(newLanguage);
             setTeacherDescription(newDescription);
             setTagString(newTag);
             setTeacherImage(updateFileUrl);
             handleCloseEditModal();
+            window.location.reload()
         } catch (err) {
             console.error("프로필 업데이트 오류", err);
             setPwError("프로필 업데이트 중 오류가 발생했습니다.");
+        }
+    };
+
+    // Course 생성 핸들러
+    const handleCreateCourse = async (event) => {
+        event.preventDefault();
+        const courseData = {
+            title: newCourseTitle,
+            description: newCourseDescription,
+            maxStudents: parseInt(newCourseMaxStudents, 10),
+            language: newCourseLanguage,
+            level: newCourseLevel
+        };
+
+        try {
+            const res = await courseApi.createCourse(courseData);
+            // 새로 생성된 강좌를 목록에 추가
+            setCourses(prev => [...prev, res.data]);
+            setCourseMessage('Course created successfully!');
+            handleCloseCreateCourseModal();
+            window.location.reload()
+        } catch (error) {
+            setCourseMessage(`Course creation failed: ${error.response?.data || error.message}`);
         }
     };
 
@@ -468,7 +535,12 @@ const TeacherProfile = () => {
                 </ProfileSection>
 
                 <CoursesSection>
-                    <SectionTitle>Teacher's Courses</SectionTitle>
+                    <CoursesHeader>
+                        <SectionTitle>Teacher's Courses</SectionTitle>
+                        {isOwner && (
+                            <CreateCourseButton onClick={handleOpenCreateCourseModal}>+</CreateCourseButton>
+                        )}
+                    </CoursesHeader>
                     <CoursesGrid>
                         {courses.map(course => (
                             <CourseCard key={course.id}>
@@ -508,6 +580,7 @@ const TeacherProfile = () => {
             </Main>
             <Footer />
 
+            {/* Edit Profile Modal */}
             {showEditModal && (
                 <ModalOverlay>
                     <ModalContent>
@@ -561,6 +634,83 @@ const TeacherProfile = () => {
                             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                                 <SaveButton type="submit">Save Changes</SaveButton>
                                 <CancelButton type="button" onClick={handleCloseEditModal}>Cancel</CancelButton>
+                            </div>
+                        </form>
+                    </ModalContent>
+                </ModalOverlay>
+            )}
+
+            {/* Create Course Modal */}
+            {showCreateCourseModal && (
+                <ModalOverlay>
+                    <ModalContent>
+                        <h2>Create Course</h2>
+                        <form onSubmit={handleCreateCourse}>
+                            <FormGroup>
+                                <Label htmlFor="courseTitle">Course Title</Label>
+                                <Input
+                                    id="courseTitle"
+                                    type="text"
+                                    value={newCourseTitle}
+                                    onChange={(e) => setNewCourseTitle(e.target.value)}
+                                    required
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label htmlFor="courseDescription">Description</Label>
+                                <TextArea
+                                    id="courseDescription"
+                                    rows="4"
+                                    value={newCourseDescription}
+                                    onChange={(e) => setNewCourseDescription(e.target.value)}
+                                    required
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label htmlFor="maxStudents">Max Students</Label>
+                                <Input
+                                    id="maxStudents"
+                                    type="number"
+                                    value={newCourseMaxStudents}
+                                    onChange={(e) => setNewCourseMaxStudents(e.target.value)}
+                                    required
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label htmlFor="courseLanguage">Language</Label>
+                                <Select
+                                    id="courseLanguage"
+                                    value={newCourseLanguage}
+                                    onChange={(e) => setNewCourseLanguage(e.target.value)}
+                                    required
+                                >
+                                    <option value="">Select Language</option>
+                                    <option value="ENGLISH">ENGLISH</option>
+                                    <option value="KOREAN">KOREAN</option>
+                                    <option value="JAPANESE">JAPANESE</option>
+                                    <option value="CHINESE">CHINESE</option>
+                                    <option value="SPANISH">SPANISH</option>
+                                    <option value="FRENCH">FRENCH</option>
+                                </Select>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label htmlFor="courseLevel">Course Level</Label>
+                                <Select
+                                    id="courseLevel"
+                                    value={newCourseLevel}
+                                    onChange={(e) => setNewCourseLevel(e.target.value)}
+                                    required
+                                >
+                                    <option value="">Select Level</option>
+                                    <option value="BEGINNER">Beginner</option>
+                                    <option value="INTERMEDIATE">Intermediate</option>
+                                    <option value="ADVANCED">Advanced</option>
+                                </Select>
+                            </FormGroup>
+                            {courseMessage && <p>{courseMessage}</p>}
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <SaveButton type="submit">Create Course</SaveButton>
+                                <CancelButton type="button" onClick={handleCloseCreateCourseModal}>Cancel</CancelButton>
                             </div>
                         </form>
                     </ModalContent>

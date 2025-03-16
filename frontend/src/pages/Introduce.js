@@ -375,7 +375,7 @@ const IntroducePage = () => {
                 console.error('Failed to fetch courses', error);
             });
     }, []);
-    console.log(user);
+
     const handleGoLogin = () => {
         navigate('/signin');
     };

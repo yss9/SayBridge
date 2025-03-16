@@ -8,6 +8,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class TeacherProfileService {
 
@@ -20,17 +22,20 @@ public class TeacherProfileService {
     }
 
     public void updateTeacherProfile(TeacherProfileDto updateData, User user) {
+        TeacherProfile teacherProfile = teacherProfileRepository.findByUser(user).orElseThrow(() -> new EntityNotFoundException("TeacherProfile with id " + user.getId() + " not found"));
         if(updateData.getDescription()!=null){
-
+            teacherProfile.setDescription(updateData.getDescription());
         }
         if(updateData.getTag()!=null){
-
+            teacherProfile.setTag(updateData.getTag());
         }
         if(updateData.getLanguage()!=null){
-
+            teacherProfile.setLanguage(updateData.getLanguage());
         }
         if(updateData.getImageUrl()!=null){
-
+            teacherProfile.setImageUrl(updateData.getImageUrl());
         }
+        teacherProfileRepository.save(teacherProfile);
+
     }
 }

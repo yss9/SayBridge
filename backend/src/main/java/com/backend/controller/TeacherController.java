@@ -29,7 +29,8 @@ public class TeacherController {
     @PatchMapping("/update")
     public ResponseEntity<Void> updateTeacherProfile(@RequestBody TeacherProfileDto teacherProfileDto, Authentication authentication) {
         User currentUser = authService.getCurrentUser(authentication);
-
+        teacherProfileService.updateTeacherProfile(teacherProfileDto, currentUser);
+        return ResponseEntity.ok().build();
     }
 
 

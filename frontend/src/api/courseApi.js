@@ -1,6 +1,10 @@
 import apiClient from './index';
 
 const courseApi = {
+    getCourse: (courseId) => {
+        return apiClient.get(`/course/${courseId}`, { withCredentials: true });
+    },
+
     getCourses: (page = 0, size = 9) => {
         return apiClient.get(`/course?page=${page}&size=${size}`, { withCredentials: true });
     },
@@ -22,6 +26,16 @@ const courseApi = {
     getCourseByTeacherId: (teacherId) => {
         return apiClient.get(`/course/teacher/${teacherId}`, { withCredentials: true });
     },
+
+    createCourse:(courseDto) =>{
+        return apiClient.post(`/course/create`,courseDto, {withCredentials:true})
+    }
 };
+
+const coursePostApi = {
+    getCoursePosts:(courseId)=>{
+        return apiClient.get(`/post/${courseId}`, {withCredentials:true})
+    }
+}
 
 export { courseApi };

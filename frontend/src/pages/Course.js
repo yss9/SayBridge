@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import styled from 'styled-components';
 import Footer from '../component/Footer';
 import Header from '../component/Header';
 import EnrollmentListModal from './EnrollmentListModal';
+import {AuthContext} from "../context/AuthContext";
+import {useParams} from "react-router-dom";
+import {courseApi} from "../api/courseApi";
+import {teacherApi} from "../api/userApi";
 
 const Container = styled.div`
     display: flex;
@@ -153,6 +157,7 @@ const SubmitButton = styled.button`
     border-radius: 2%;
     cursor: pointer;
     transition: background-color 0.2s;
+    margin-right: 5px;
 
     &:hover {
         background-color: #333;
@@ -160,6 +165,37 @@ const SubmitButton = styled.button`
 `;
 
 const CoursePage = () => {
+    const { user } = useContext(AuthContext);
+    const { courseId } = useParams();
+    const [ teacher, setTeacher ] = useState([]);
+    const [course, setCourse] = useState([]);
+
+    const isOwner = user && teacher && (teacher.userId === user.id);
+
+    const isEnrolled = true;
+
+
+    useEffect(() => {
+        courseApi.getCourse(courseId)
+            .then(response => setCourse(response.data))
+            .catch(error => console.error('Failed to fetch course', error));
+    }, [courseId]);
+
+    useEffect(() => {
+        if (course && course.teacherId) {
+            teacherApi.teacherInfo(course.teacherId)
+                .then(response => setTeacher(response.data))
+                .catch(error => console.error('Failed to fetch teacher info', error));
+        }
+    }, [course]);
+
+
+    const [submissions, setSubmissions] = useState({
+        1: false,
+        2: true,
+        3: false,
+    });
+
     const [showEnrollmentList, setShowEnrollmentList] = useState(false);
 
     const handleOpenEnrollmentList = () => {
@@ -170,25 +206,58 @@ const CoursePage = () => {
         setShowEnrollmentList(false);
     };
 
+    const handleCreatePost = () => {
+        console.log("Navigate to Create Post page");
+    };
+
+    const handleFileSubmit = (postId) => {
+        console.log(`Submit file for post ${postId}`);
+        setSubmissions(prev => ({ ...prev, [postId]: true }));
+    };
+
+    const handleCheckSubmission = (postId) => {
+        console.log(`Check submitted file for post ${postId}`);
+    };
+
+    const handleModifySubmission = (postId) => {
+        console.log(`Modify submission for post ${postId}`);
+    };
+
+    const handleTeacherCheckSubmissions = (postId) => {
+        console.log(`Teacher checking submissions for post ${postId}`);
+    };
+
     return (
         <Container>
             <Header />
 
             <ProfileSection>
                 <ProfileDetails>
-                    <ProfileName>Teacher Kim</ProfileName>
+                    <ProfileName></ProfileName>
                     <ProfileDescription>Experienced teacher passionate about education</ProfileDescription>
                 </ProfileDetails>
-                <EnrollmentListButton onClick={handleOpenEnrollmentList}>
-                    Enrollment List
-                </EnrollmentListButton>
+                {isOwner ? (
+                    <EnrollmentListButton onClick={handleOpenEnrollmentList}>
+                        Enrollment List
+                    </EnrollmentListButton>
+                ) : (
+                    isEnrolled && (
+                        <EnrollmentListButton onClick={handleOpenEnrollmentList}>
+                            수강신청
+                        </EnrollmentListButton>
+                    )
+                )}
             </ProfileSection>
 
             <Main>
                 <PostsSection>
                     <SectionTitle>Recent Posts</SectionTitle>
                     <SectionSubtitle>Engage with other students and share your thoughts</SectionSubtitle>
-                    <CreatePostButton>Create Post</CreatePostButton>
+                    {isOwner && (
+                        <CreatePostButton onClick={handleCreatePost}>
+                            Create Post
+                        </CreatePostButton>
+                    )}
 
                     {[1, 2, 3].map((post) => (
                         <PostCard key={post}>
@@ -201,7 +270,28 @@ const CoursePage = () => {
                             </PostHeader>
                             <PostContent>반장에 맞는 문장을 작성해보세요!</PostContent>
                             <FileAttachment>Test.pdf</FileAttachment>
-                            <SubmitButton>제출된 파일 확인</SubmitButton>
+                            {isOwner ? (
+                                <SubmitButton onClick={() => handleTeacherCheckSubmissions(post)}>
+                                    제출된 파일 확인
+                                </SubmitButton>
+                            ) : (
+                                isEnrolled && (
+                                    submissions[post] ? (
+                                        <>
+                                            <SubmitButton onClick={() => handleCheckSubmission(post)}>
+                                                내가 제출한 숙제 확인
+                                            </SubmitButton>
+                                            <SubmitButton onClick={() => handleModifySubmission(post)}>
+                                                수정
+                                            </SubmitButton>
+                                        </>
+                                    ) : (
+                                        <SubmitButton onClick={() => handleFileSubmit(post)}>
+                                            파일 제출하기
+                                        </SubmitButton>
+                                    )
+                                )
+                            )}
                         </PostCard>
                     ))}
                 </PostsSection>

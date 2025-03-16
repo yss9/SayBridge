@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
 import { courseApi } from '../api/courseApi';
+import {Link} from "react-router-dom";
 
 const PageContainer = styled.div`
     display: flex;
@@ -341,7 +342,9 @@ const CourseList = () => {
                         <CoursesGrid>
                             {featuredCourses.map(course => (
                                 <CourseCard key={course.id}>
-                                    <CourseTitle>{course.title}</CourseTitle>
+                                    <Link to={`/course/${course.id}`} style={{ textDecoration: 'none' }}>
+                                        <CourseTitle>{course.title}</CourseTitle>
+                                    </Link>
                                     <CourseInfo key={course.teacherId}>
                                         <strong>Teacher:</strong>
                                         <a href={`/teacher/${course.teacherId}`} style={{ textDecoration: 'none', color: 'blue' }}>
