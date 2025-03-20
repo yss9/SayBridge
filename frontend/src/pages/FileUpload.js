@@ -1,6 +1,7 @@
 import React, {use, useState} from 'react';
-import { uploadApi } from '../api/authApi';
+import { uploadApi } from '../api/fileUploadApi';
 import { userInfoApi } from '../api/userApi';
+import {authApi} from "../api/authApi";
 const FileUpload = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [message, setMessage] = useState('');
@@ -19,7 +20,7 @@ const FileUpload = () => {
         }
 
         try {
-            const response = await uploadApi.fileUpload(selectedFile);
+            const response = await uploadApi.userProfileUpload(selectedFile);
             setMessage(`파일 업로드 성공: ${response.data}`);
         } catch (error) {
             setMessage(`업로드 실패: ${error.response?.data || error.message}`);
@@ -36,7 +37,7 @@ const FileUpload = () => {
         const request = { email, password };
 
         try {
-            const response = await userInfoApi.verifyPassword(request);
+            const response = await authApi.verifyPassword(request);
             console.log("서버 응답 데이터:", response.data);
 
             // response.data.message 만 저장 (객체 전체가 아니라)

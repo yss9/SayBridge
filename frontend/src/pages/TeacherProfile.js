@@ -7,7 +7,7 @@ import Footer from '../component/Footer';
 import { teacherApi } from '../api/userApi';
 import { courseApi } from '../api/courseApi';
 import { reviewApi } from '../api/reviewApi';
-import { uploadApi } from '../api/authApi';
+import { uploadApi } from "../api/fileUploadApi";
 import { userInfoApi } from '../api/userApi';
 import { AuthContext } from "../context/AuthContext";
 
@@ -458,7 +458,7 @@ const TeacherProfile = () => {
         let updateFileUrl = teacherImage;
         if (file) {
             try {
-                const response = await uploadApi.fileUpload(file);
+                const response = await uploadApi.teacherProfileUpload(file);
                 setMessage(`파일 업로드 성공: ${response.data}`);
                 updateFileUrl = response.data;
             } catch (error) {

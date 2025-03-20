@@ -3,7 +3,8 @@ import styled from 'styled-components';
 import Header from '../component/Header';
 import Footer from '../component/Footer';
 import { userInfoApi } from "../api/userApi";
-import { uploadApi, authApi } from "../api/authApi";
+import { authApi } from "../api/authApi";
+import { uploadApi } from "../api/fileUploadApi";
 import { courseApi } from "../api/courseApi";
 import { reviewApi } from "../api/reviewApi";
 
@@ -509,7 +510,7 @@ const MyPage = () => {
         let updateFileUrl = "";
         if (file) {
             try {
-                const response = await uploadApi.fileUpload(file);
+                const response = await uploadApi.userProfileUpload(file);
                 setMessage(`파일 업로드 성공: ${response.data}`);
                 updateFileUrl = response.data;
             } catch (error) {
@@ -540,6 +541,7 @@ const MyPage = () => {
             await userInfoApi.updateUserProfile(updateData);
             setMessage("프로필이 성공적으로 업데이트되었습니다.");
             handleCloseEditModal();
+            window.location.reload()
         } catch (err) {
             console.error("프로필 업데이트 오류", err);
             setPwError("프로필 업데이트 중 오류가 발생했습니다.");
