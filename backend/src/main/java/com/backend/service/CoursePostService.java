@@ -31,14 +31,15 @@ public class CoursePostService {
         return coursePostDtos;
     }
 
-    public void coursePostsAdd(CoursePostDto coursePostDto) {
+    public Long coursePostsAdd(CoursePostDto coursePostDto) {
         CoursePost coursePost = new CoursePost();
         Course course = courseRepository.findById(coursePostDto.getCourseId()).orElseThrow(()->new UsernameNotFoundException("해당 강좌를 찾을 수 없습니다."));
         coursePost.setCourseId(course);
         coursePost.setTitle(coursePostDto.getTitle());
         coursePost.setContent(coursePostDto.getContent());
         coursePost.setAttachmentUrl(coursePostDto.getAttachmentUrl());
-        coursePostRepository.save(coursePost);
+        CoursePost saved = coursePostRepository.save(coursePost);
+        return saved.getId();
     }
 
     public void coursePostsUpdate(Long postId, CoursePostDto coursePostDto) {

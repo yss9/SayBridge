@@ -64,22 +64,6 @@ public class FileStorageService {
         return fileUrl;
     }
 
-    public String uploadHomeworkFile(Long coursePostId, User user, MultipartFile multipartFile) throws IOException {
-        File file = convertMultipartFileToFile(multipartFile);
-        Homework homework = homeworkRepository.findByStudentIdAndCoursePostId(user.getId(), coursePostId).orElseThrow();
-
-        String oldKey = homework.getAttachmentUrl();
-         if (oldKey != null) {
-             s3Service.deleteFile(oldKey);
-         }
-
-        String newKey = "user/homework/" + coursePostId + "/" + user.getId() + "/" + UUID.randomUUID() + "-" + multipartFile.getOriginalFilename();
-        String fileUrl = s3Service.uploadFile(newKey, file);
-        file.delete();
-
-        return fileUrl;
-    }
-
     public String uploadCoursePostFile(Long coursePostId, MultipartFile multipartFile) throws IOException {
         File file = convertMultipartFileToFile(multipartFile);
 
@@ -90,6 +74,22 @@ public class FileStorageService {
          }
 
         String newKey = "user/homework/" + coursePostId + "/" + multipartFile.getOriginalFilename();
+        String fileUrl = s3Service.uploadFile(newKey, file);
+        file.delete();
+
+        return fileUrl;
+    }
+
+    public String uploadHomeworkFile(Long coursePostId, User user, MultipartFile multipartFile) throws IOException {
+        File file = convertMultipartFileToFile(multipartFile);
+        Homework homework = homeworkRepository.findByStudentIdAndCoursePostId(user.getId(), coursePostId).orElseThrow();
+
+        String oldKey = homework.getAttachmentUrl();
+         if (oldKey != null) {
+             s3Service.deleteFile(oldKey);
+         }
+
+        String newKey = "user/homework/" + coursePostId + "/" + user.getId() + "/" + UUID.randomUUID() + "-" + multipartFile.getOriginalFilename();
         String fileUrl = s3Service.uploadFile(newKey, file);
         file.delete();
 

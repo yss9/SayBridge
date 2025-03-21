@@ -21,7 +21,7 @@ const uploadApi = {
             withCredentials: true
         });
     },
-    coursePostProfileUpload: (file, coursePostId) => {
+    coursePostFileUpload: (coursePostId, file) => {
         const formData = new FormData();
         formData.append('file', file);
         return apiClient.post(`/files/coursePost/${coursePostId}`, formData, {
@@ -31,7 +31,7 @@ const uploadApi = {
             withCredentials: true
         });
     },
-    homeworkProfileUpload: (file, coursePostId) => {
+    homeworkFileUpload: (file, coursePostId) => {
         const formData = new FormData();
         formData.append('file', file);
         return apiClient.post(`/files/homework/${coursePostId}`, formData, {

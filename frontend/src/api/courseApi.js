@@ -35,7 +35,18 @@ const courseApi = {
 const coursePostApi = {
     getCoursePosts:(courseId)=>{
         return apiClient.get(`/post/${courseId}`, {withCredentials:true})
+    },
+
+    createCoursePost:(coursePostDto) =>{
+        return apiClient.post(`/post/create`, coursePostDto, {withCredentials:true})
+    },
+    updateCoursePost:(coursePostId, coursePostDto) =>{
+        return apiClient.patch(`/post/update/${coursePostId}`, coursePostDto, {withCredentials:true})
+    },
+    deleteCoursePost:(coursePostId) =>{
+        return apiClient.delete(`/post/delete/${coursePostId}`, {withCredentials: true})
     }
+
 }
 
-export { courseApi };
+export { courseApi, coursePostApi };

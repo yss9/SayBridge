@@ -12,6 +12,8 @@ import FileUpload from "./pages/FileUpload";
 import RequestTest from "./pages/RequestTest";
 import ReviewTest from "./pages/ReviewTest";
 import {AuthProvider} from "./context/AuthContext";
+import CoursePost from "./pages/CoursePost";
+import FileTest from "./pages/FileTest";
 
 const App = () => {
     return (
@@ -27,10 +29,12 @@ const App = () => {
                     <Route path="/videochat" element={<VideoChat />} />
                     <Route path="/course/:courseId" element={<Course />} />
                     <Route path="/teacher/:teacherId" element={<TeacherProfile />} />
+                    <Route path="/posting/:courseId" element={<CoursePost/>}/>
 
                     <Route path="/file" element={<FileUpload/>}/>
                     <Route path="/reviewTest" element={<ReviewTest/>}/>
                     <Route path="/requestTest" element={<RequestTest/>}/>
+                    <Route path="/fileTest" element={<FileTest/>}/>
                 </Routes>
             </Router>
         </AuthProvider>

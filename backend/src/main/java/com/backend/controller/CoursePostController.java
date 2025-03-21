@@ -22,16 +22,16 @@ public class CoursePostController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Void> createCoursePost(@RequestBody CoursePostDto coursePostDto) {
-        coursePostService.coursePostsAdd(coursePostDto);
+    public ResponseEntity<Long> createCoursePost(@RequestBody CoursePostDto coursePostDto) {
+        Long coursePostId = coursePostService.coursePostsAdd(coursePostDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .build();
+                .body(coursePostId);
     }
 
-    @PatchMapping("/update/{postId}")
-    public ResponseEntity<Void> updateCoursePost(@PathVariable Long postId,@RequestBody CoursePostDto coursePostDto) {
-        coursePostService.coursePostsUpdate(postId, coursePostDto);
+    @PatchMapping("/update/{coursePostId}")
+    public ResponseEntity<Void> updateCoursePost(@PathVariable Long coursePostId,@RequestBody CoursePostDto coursePostDto) {
+        coursePostService.coursePostsUpdate(coursePostId, coursePostDto);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .build();

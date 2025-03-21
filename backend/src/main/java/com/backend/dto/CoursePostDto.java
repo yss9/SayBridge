@@ -14,12 +14,14 @@ import java.time.LocalDateTime;
 public class CoursePostDto {
 
     private Long courseId;
+    private Long postId;
     private String title;
     private String content;
     private String attachmentUrl;
     private LocalDateTime created;
 
     public CoursePostDto(CoursePost coursePost) {
+        this.postId = coursePost.getId();
         this.title = coursePost.getTitle();
         this.content = coursePost.getContent();
         this.attachmentUrl = coursePost.getAttachmentUrl();
