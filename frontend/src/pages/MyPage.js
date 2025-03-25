@@ -1,3 +1,4 @@
+// MyPage.js
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Header from '../component/Header';
@@ -7,6 +8,8 @@ import { authApi } from "../api/authApi";
 import { uploadApi } from "../api/fileUploadApi";
 import { courseApi } from "../api/courseApi";
 import { reviewApi } from "../api/reviewApi";
+import { courseApplicationApi } from "../api/courseApi";
+import MyApplicationModal from './MyApplicationModal';
 
 const PageContainer = styled.div`
     display: flex;
@@ -105,7 +108,7 @@ const SectionTitle = styled.h2`
 
 const SliderContainer = styled.div`
     position: relative;
-    width: 1000px; /* 고정 폭 */
+    width: 1000px;
     margin: 0 auto;
     overflow: visible;
     box-sizing: border-box;
@@ -114,7 +117,7 @@ const SliderContainer = styled.div`
 const CoursesList = styled.div`
     display: flex;
     gap: 20px;
-    justify-content: ${(props) => (props.$center ? 'center' : 'flex-start')};
+    justify-content: ${props => (props.$center ? 'center' : 'flex-start')};
 `;
 
 const CourseCard = styled.div`
@@ -189,81 +192,7 @@ const RightArrow = styled(ArrowButton)`
     transform: translateY(-50%);
 `;
 
-const ReviewSliderContainer = styled.div`
-    position: relative;
-    width: 1000px; /* 고정 폭 */
-    margin: 0 auto;
-    overflow: visible;
-    box-sizing: border-box;
-`;
-
-const ReviewsSection = styled.section`
-    width: 100%;
-    max-width: 1000px;
-    padding: 40px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-`;
-
-const ReviewsList = styled.div`
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: ${(props) => (props.$center ? 'center' : 'flex-start')};
-`;
-
-const ReviewCard = styled.div`
-    flex: 1 1 200px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 16px;
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    position: relative;
-`;
-
-const ReviewPhoto = styled.div`
-    width: 40px;
-    height: 40px;
-    background: #ccc;
-    border-radius: 100%;
-`;
-
-const ReviewContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-`;
-
-const ReviewerName = styled.div`
-    font-weight: bold;
-    font-size: 14px;
-`;
-
-const ReviewRating = styled.div`
-    font-size: 14px;
-    color: #f5c518;
-`;
-
-const ReviewText = styled.div`
-    font-size: 14px;
-    color: #333;
-`;
-
-const DeleteButton = styled.button`
-    background: none;
-    border: none;
-    font-size: 16px;
-    color: red;
-    cursor: pointer;
-    position: absolute;
-    top: 8px;
-    right: 8px;
-`;
-
+// 모달 관련 Styled Components (프로필 수정, 리뷰 작성 등에서 사용)
 const ModalOverlay = styled.div`
     position: fixed;
     top: 0;
@@ -353,6 +282,8 @@ const CheckButton = styled.button`
 
 const MyPage = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
     const [profile, setProfile] = useState({});
     const [file, setFile] = useState(null);
     const [nickname, setNickname] = useState("");
@@ -370,12 +301,9 @@ const MyPage = () => {
     const [reviewsIndex, setReviewsIndex] = useState(0);
     const [reviewMap, setReviewMap] = useState({});
 
-    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [currentCourseForReview, setCurrentCourseForReview] = useState(null);
     const [reviewRating, setReviewRating] = useState(5);
     const [reviewContent, setReviewContent] = useState("");
-
-
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -405,7 +333,6 @@ const MyPage = () => {
         };
         fetchMyReviews();
     }, []);
-
 
     useEffect(() => {
         const newMap = {};
@@ -457,7 +384,6 @@ const MyPage = () => {
                 rating: reviewRating,
                 content: reviewContent,
             });
-
             const response = await reviewApi.getMyReview();
             setReviews(response.data);
             closeReviewModal();
@@ -465,7 +391,6 @@ const MyPage = () => {
             console.error("리뷰 작성 오류", err);
         }
     };
-
 
     const handleOpenEditModal = () => {
         setIsEditModalOpen(true);
@@ -541,21 +466,17 @@ const MyPage = () => {
             await userInfoApi.updateUserProfile(updateData);
             setMessage("프로필이 성공적으로 업데이트되었습니다.");
             handleCloseEditModal();
-            window.location.reload()
+            window.location.reload();
         } catch (err) {
             console.error("프로필 업데이트 오류", err);
             setPwError("프로필 업데이트 중 오류가 발생했습니다.");
         }
     };
 
-
     const isCenter = courses.length < 3;
-
     const isReviewsCenter = reviews.length < 3;
-
     const disablePrev = currentIndex === 0 || courses.length <= 3;
     const disableNext = currentIndex + 3 >= courses.length || courses.length <= 3;
-
     const disableReviewsPrev = reviewsIndex === 0 || reviews.length <= 2;
     const disableReviewsNext = reviewsIndex + 2 >= reviews.length || reviews.length <= 2;
 
@@ -586,6 +507,9 @@ const MyPage = () => {
                     </UserInfo>
                     <ButtonGroup>
                         <ProfileButton onClick={handleOpenEditModal}>Edit Profile</ProfileButton>
+                        <ProfileButton onClick={() => setIsApplicationModalOpen(true)}>
+                            내 수강신청 내역
+                        </ProfileButton>
                     </ButtonGroup>
                 </BannerContent>
             </Banner>
@@ -608,11 +532,12 @@ const MyPage = () => {
                                         <CourseInfo>Max Students: {course.maxStudents}</CourseInfo>
                                         <CourseInfo>Language: {course.language}</CourseInfo>
                                         <CourseInfo>Level: {course.level}</CourseInfo>
-
                                         {hasReview ? (
                                             <ReviewButton disabled>작성완료</ReviewButton>
                                         ) : (
-                                            <ReviewButton onClick={() => openReviewModal(course)}>리뷰작성</ReviewButton>
+                                            <ReviewButton onClick={() => openReviewModal(course)}>
+                                                리뷰작성
+                                            </ReviewButton>
                                         )}
                                     </CourseCard>
                                 );
@@ -623,35 +548,31 @@ const MyPage = () => {
                         </RightArrow>
                     </SliderContainer>
                 </CoursesSection>
-
-                {/* 리뷰 슬라이더 영역 (2개씩 표시) */}
-                <ReviewsSection>
+                <CoursesSection>
                     <SectionTitle>User Reviews</SectionTitle>
-                    <ReviewSliderContainer>
+                    <SliderContainer>
                         <LeftArrow onClick={handleReviewsPrev} disabled={disableReviewsPrev}>
                             ◀
                         </LeftArrow>
-                        <ReviewsList $center={isReviewsCenter}>
+                        <CoursesList $center={isReviewsCenter}>
                             {reviews.slice(reviewsIndex, reviewsIndex + 2).map(review => (
-                                <ReviewCard key={review.id}>
-                                    <ReviewContent>
-                                        <ReviewerName>{review.courseTitle}</ReviewerName>
-                                        <ReviewRating>{renderStars(review.rating)}</ReviewRating>
-                                        <ReviewText>{review.content}</ReviewText>
-                                    </ReviewContent>
-                                    <DeleteButton onClick={() => handleDeleteReview(review.id)}>×</DeleteButton>
-                                </ReviewCard>
+                                <CourseCard key={review.id}>
+                                    <CourseName>{review.courseTitle}</CourseName>
+                                    <CourseInfo>{renderStars(review.rating)}</CourseInfo>
+                                    <CourseInfo>{review.content}</CourseInfo>
+                                    <ProfileButton onClick={() => handleDeleteReview(review.id)}>
+                                        ×
+                                    </ProfileButton>
+                                </CourseCard>
                             ))}
-                        </ReviewsList>
+                        </CoursesList>
                         <RightArrow onClick={handleReviewsNext} disabled={disableReviewsNext}>
                             ▶
                         </RightArrow>
-                    </ReviewSliderContainer>
-                </ReviewsSection>
+                    </SliderContainer>
+                </CoursesSection>
             </Main>
             <Footer />
-
-            {/* 프로필 수정 모달 */}
             {isEditModalOpen && (
                 <ModalOverlay onClick={handleCloseEditModal}>
                     <ModalContent onClick={(e) => e.stopPropagation()}>
@@ -709,8 +630,6 @@ const MyPage = () => {
                     </ModalContent>
                 </ModalOverlay>
             )}
-
-            {/* 리뷰 작성 모달 */}
             {isReviewModalOpen && (
                 <ModalOverlay onClick={closeReviewModal}>
                     <ModalContent onClick={(e) => e.stopPropagation()}>
@@ -738,6 +657,9 @@ const MyPage = () => {
                         <SaveButton onClick={handleSubmitReview}>리뷰 저장</SaveButton>
                     </ModalContent>
                 </ModalOverlay>
+            )}
+            {isApplicationModalOpen && (
+                <MyApplicationModal onClose={() => setIsApplicationModalOpen(false)} />
             )}
         </PageContainer>
     );

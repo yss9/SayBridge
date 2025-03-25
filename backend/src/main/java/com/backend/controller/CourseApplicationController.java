@@ -1,6 +1,7 @@
 package com.backend.controller;
 
 import com.backend.dto.CourseApplicationDto;
+import com.backend.dto.UserCourseApplicationDto;
 import com.backend.entity.User;
 import com.backend.service.AuthService;
 import com.backend.service.CourseApplicationService;
@@ -46,6 +47,29 @@ public class CourseApplicationController {
         courseApplicationService.reject(applicationId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<UserCourseApplicationDto>> getMyCourseApplications(Authentication authentication) {
+        User currentUser = authService.getCurrentUser(authentication);
+        List<UserCourseApplicationDto> byUser = courseApplicationService.findByUser(currentUser);
+        return ResponseEntity.ok().body(byUser);
+
+    }
+
+    @DeleteMapping("/delete/{courseId}")
+    public ResponseEntity<Void> deleteApplication(@PathVariable Long courseId, Authentication authentication) {
+        User currentUser = authService.getCurrentUser(authentication);
+        courseApplicationService.delete(courseId,currentUser);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/check/{courseId}")
+    public ResponseEntity<Boolean> check(@PathVariable Long courseId, Authentication authentication) {
+        User currentUser = authService.getCurrentUser(authentication);
+        boolean check = courseApplicationService.check(courseId, currentUser);
+        return ResponseEntity.ok().body(check);
+    }
+
 
 
 }

@@ -47,6 +47,55 @@ const coursePostApi = {
         return apiClient.delete(`/post/delete/${coursePostId}`, {withCredentials: true})
     }
 
+};
+
+const courseApplicationApi = {
+    getCourseApplicationList:(courseId) =>{
+        return apiClient.get(`/application/list/${courseId}`, {withCredentials: true})
+    },
+
+    applyCourse:(courseId) =>{
+        return apiClient.post(`/application/apply/${courseId}`, [],{withCredentials: true})
+    },
+
+    acceptCourseApplication:(applicationId) =>{
+        return apiClient.delete(`/application/accept/${applicationId}`, {withCredentials: true})
+    },
+
+    rejectCourseApplication:(applicationId) =>{
+        return apiClient.delete(`/application/reject/${applicationId}`, {withCredentials: true})
+    },
+
+    getMyApplicationList:() =>{
+        return apiClient.get(`/application/my`, {withCredentials: true})
+    },
+
+    deleteMyApplication:(courseId) =>{
+        return apiClient.delete(`/application/delete/${courseId}`, {withCredentials: true})
+    },
+
+    checkApplication:(courseId)=>{
+        return apiClient.get(`/application/check/${courseId}`, {withCredentials: true})
+    }
+
 }
 
-export { courseApi, coursePostApi };
+const courseEnrollmentApi = {
+    getCourseEnrollmentList:(courseId) =>{
+        return apiClient.get(`/enrollment/list/${courseId}`, {withCredentials:true})
+    },
+
+    checkCourseEnrollment:(courseId) =>{
+        return apiClient.get(`/enrollment/check/${courseId}`, {withCredentials:true})
+    },
+
+    withdrawCourseEnrollment:(courseId) =>{
+        return apiClient.delete(`/enrollment/withdraw/${courseId}`, {withCredentials:true})
+    },
+
+    expelCourseEnrollment:(enrollmentId) =>{
+        return apiClient.delete(`/enrollment/expel/${enrollmentId}`, {withCredentials:true})
+    },
+}
+
+export { courseApi, coursePostApi, courseApplicationApi, courseEnrollmentApi };
