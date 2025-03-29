@@ -46,7 +46,6 @@ const Header = () => {
     const isLoggedIn = !!user;
     const role = user?.role || '';
 
-
     const handleGoHome = () =>{
         navigate('/');
     }
@@ -60,7 +59,7 @@ const Header = () => {
     }
 
     const handleGoTeacherProfile = () => {
-        navigate("/teacherProfile");
+        navigate(`/teacher/${user.teacherId}`);
     };
 
     const handleLogout = async () => {

@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface CoursePostRepository extends JpaRepository<CoursePost,Long> {
 
-    List<CoursePost> findCoursePostsByCourseId(Course courseId);
+    List<CoursePost> findCoursePostsByCourseIdOrderByCreatedAtDesc(Course courseId);
+
 
 }

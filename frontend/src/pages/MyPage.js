@@ -10,6 +10,7 @@ import { courseApi } from "../api/courseApi";
 import { reviewApi } from "../api/reviewApi";
 import { courseApplicationApi } from "../api/courseApi";
 import MyApplicationModal from './MyApplicationModal';
+import {Link} from "react-router-dom";
 
 const PageContainer = styled.div`
     display: flex;
@@ -526,8 +527,10 @@ const MyPage = () => {
                                 return (
                                     <CourseCard key={course.id} id={`course-${course.id}`}>
                                         <CourseImage />
-                                        <CourseName>{course.title}</CourseName>
-                                        <CourseInfo>Teacher: {course.teacherId}</CourseInfo>
+                                        <Link to={`/course/${course.id}`} style={{ textDecoration: 'none' }}>
+                                            <CourseName>{course.title}</CourseName>
+                                        </Link>
+                                        <CourseInfo>Teacher: {course.teacherName}</CourseInfo>
                                         <CourseInfo>Description: {course.description}</CourseInfo>
                                         <CourseInfo>Max Students: {course.maxStudents}</CourseInfo>
                                         <CourseInfo>Language: {course.language}</CourseInfo>
@@ -557,7 +560,9 @@ const MyPage = () => {
                         <CoursesList $center={isReviewsCenter}>
                             {reviews.slice(reviewsIndex, reviewsIndex + 2).map(review => (
                                 <CourseCard key={review.id}>
-                                    <CourseName>{review.courseTitle}</CourseName>
+                                    <Link to={`/course/${review.courseId}`} style={{ textDecoration: 'none' }}>
+                                        <CourseName>{review.courseTitle}</CourseName>
+                                    </Link>
                                     <CourseInfo>{renderStars(review.rating)}</CourseInfo>
                                     <CourseInfo>{review.content}</CourseInfo>
                                     <ProfileButton onClick={() => handleDeleteReview(review.id)}>

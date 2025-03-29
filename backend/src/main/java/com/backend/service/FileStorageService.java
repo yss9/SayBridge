@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -82,20 +83,22 @@ public class FileStorageService {
 
     public String uploadHomeworkFile(Long coursePostId, User user, MultipartFile multipartFile) throws IOException {
         File file = convertMultipartFileToFile(multipartFile);
-        Homework homework = homeworkRepository.findByStudentIdAndCoursePostId(user.getId(), coursePostId).orElseThrow();
+        Optional<Homework> optionalHomework = homeworkRepository.findByStudentIdAndCoursePostId(user.getId(), coursePostId);
 
-        String oldKey = homework.getAttachmentUrl();
-         if (oldKey != null) {
-             s3Service.deleteFile(oldKey);
-         }
+        if (optionalHomework.isPresent()) {
+            String oldKey = optionalHomework.get().getAttachmentUrl();
+            if (oldKey != null) {
+                s3Service.deleteFile(oldKey);
+            }
+        }
 
-        String newKey = "user/homework/" + coursePostId + "/" + user.getId() + "/" + UUID.randomUUID() + "-" + multipartFile.getOriginalFilename();
+        String newKey = "user/homework/" + coursePostId + "/" + user.getId() + "/"
+                + UUID.randomUUID() + "-" + multipartFile.getOriginalFilename();
         String fileUrl = s3Service.uploadFile(newKey, file);
         file.delete();
 
         return fileUrl;
     }
-
     private File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException {
         File file = new File(System.getProperty("java.io.tmpdir") + "/" + multipartFile.getOriginalFilename());
         try (FileOutputStream fos = new FileOutputStream(file)) {

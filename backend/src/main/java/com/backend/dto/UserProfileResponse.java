@@ -15,5 +15,6 @@ public class UserProfileResponse {
     private String nickname;
     private String profileImageUrl;
     private Role role;
+    private Long teacherId;
 
 }

@@ -3,7 +3,9 @@ package com.backend.service;
 import com.backend.dto.LoginRequest;
 import com.backend.dto.UserProfileResponse;
 import com.backend.dto.UserUpdateRequest;
+import com.backend.entity.TeacherProfile;
 import com.backend.entity.User;
+import com.backend.repository.TeacherProfileRepository;
 import com.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,11 +23,16 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private TeacherProfileRepository teacherProfileRepository;
+
     public UserProfileResponse getUserProfile(User user) {
         if (user == null) return null;
 
-        UserProfileResponse profile = new UserProfileResponse(user.getId(),user.getEmail(), user.getUsername(), user.getNickname(), user.getProfileImageUrl(), user.getRole());
-        return profile;
+        TeacherProfile teacherProfile = teacherProfileRepository.findByUser(user).orElse(null);
+        Long teacherProfileId = (teacherProfile != null) ? teacherProfile.getId() : null;
+
+        return new UserProfileResponse(user.getId(),user.getEmail(), user.getUsername(), user.getNickname(), user.getProfileImageUrl(), user.getRole(),teacherProfileId);
     }
 
 

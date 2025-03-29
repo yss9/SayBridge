@@ -23,7 +23,7 @@ public class CoursePostService {
 
     public List<CoursePostDto> findCoursePostsByCourseId(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new UsernameNotFoundException("Course not found"));
-        List<CoursePost> coursePostsByCourseId = coursePostRepository.findCoursePostsByCourseId(course);
+        List<CoursePost> coursePostsByCourseId = coursePostRepository.findCoursePostsByCourseIdOrderByCreatedAtDesc(course);
         List<CoursePostDto> coursePostDtos = new ArrayList<>();
         for (CoursePost coursePost : coursePostsByCourseId) {
             coursePostDtos.add(new CoursePostDto(coursePost));
