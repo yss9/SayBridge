@@ -34,6 +34,7 @@ public class ChatRoom {
     @PrePersist
     public void prePersist() {
         this.chatCode = generateChatCode();
+        this.createdAt = LocalDateTime.now();
     }
 
     private String generateChatCode() {

@@ -1,107 +1,179 @@
-import React from 'react';
-import styled from 'styled-components';
-import Footer from '../component/Footer';
-import Header from '../component/Header';
+// VideoChat.js
+import React, { useEffect, useRef, useState } from 'react';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
-const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-`;
+const VideoChat = () => {
+    const localVideoRef = useRef(null);
+    const remoteVideoRef = useRef(null);
+    const [stompClient, setStompClient] = useState(null);
+    const [peerConnection, setPeerConnection] = useState(null);
+    const [localStream, setLocalStream] = useState(null);
 
-const Main = styled.main`
-    flex: 1 1 auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #4a4a4a;
-    color: white;
-    text-align: center;
-    padding: 2rem;
-`;
+    // 테스트용 고정 chatCode (실제 서비스에서는 동적으로 관리)
+    const chatCode = 'o5qztq4r';
 
-const ContentWrapper = styled.div`
-    max-width: 600px;
-    width: 100%;
-`;
+    // ICE 서버 설정 (구글 STUN 서버 사용)
+    const configuration = {
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+    };
 
-const Title = styled.h1`
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-`;
+    // STOMP 클라이언트 설정 및 연결 (SockJS를 WebSocket 팩토리로 사용)
+    useEffect(() => {
+        const client = new Client({
+            // native WebSocket 대신 SockJS 사용
+            webSocketFactory: () => new SockJS('http://localhost:8080/ws-chat'),
+            reconnectDelay: 5000,
+            debug: (str) => {
+                console.log(str);
+            }
+        });
 
-const Subtitle = styled.p`
-    font-size: 100%;
-    margin-bottom: 10%;
-`;
+        client.onConnect = () => {
+            console.log('WebSocket 연결 성공');
+            // 백엔드에서 발행하는 채널 (/topic/video/{chatCode}) 구독
+            client.subscribe(`/topic/video/${chatCode}`, (message) => {
+                const data = JSON.parse(message.body);
+                console.log('수신한 시그널:', data);
+                handleSignal(data);
+            });
+        };
 
-const Input = styled.input`
-    width: 94%;
-    padding: 3%;
-    margin-bottom:2%;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-`;
+        client.activate();
+        setStompClient(client);
+    }, []);
 
-const ButtonRow = styled.div`
-    display: flex;
-    gap: 4%;
-    justify-content: space-between;
-    width: 100%;
-
-    button {
-        flex: 1;
-        padding: 2.5%;
-        font-size: 100%;
-        font-weight: bold;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .create-room {
-        background: white;
-        color: black;
-        border: 1px solid #ddd;
-
-        &:hover {
-            background: #f0f0f0;
+    // 백엔드로 시그널 전송 (offer, answer, candidate)
+    const sendSignal = (data) => {
+        if (stompClient) {
+            stompClient.publish({
+                destination: '/app/video.signal',
+                body: JSON.stringify(data)
+            });
         }
-    }
+    };
 
-    .join-room {
-        background: black;
-        color: white;
-
-        &:hover {
-            background: #333;
+    // 수신한 시그널 처리 (offer, answer, candidate)
+    const handleSignal = async (data) => {
+        if (data.type === 'offer') {
+            // 상대방 offer 수신 시
+            if (!peerConnection) {
+                await createPeerConnection();
+            }
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            sendSignal({
+                type: 'answer',
+                answer: answer,
+                chatCode: chatCode
+            });
+        } else if (data.type === 'answer') {
+            // 상대방 answer 수신 시
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+        } else if (data.type === 'candidate') {
+            // ICE candidate 수신 시
+            if (data.candidate) {
+                try {
+                    await peerConnection.addIceCandidate(data.candidate);
+                } catch (error) {
+                    console.error('ICE candidate 추가 에러:', error);
+                }
+            }
         }
-    }
-`;
+    };
 
-const VideoChatPage = () => {
+    // RTCPeerConnection 생성 및 이벤트 핸들러 등록
+    const createPeerConnection = async () => {
+        const pc = new RTCPeerConnection(configuration);
+
+        // ICE candidate 생성 시 백엔드로 전송
+        pc.onicecandidate = (event) => {
+            if (event.candidate) {
+                sendSignal({
+                    type: 'candidate',
+                    candidate: event.candidate,
+                    chatCode: chatCode
+                });
+            }
+        };
+
+        // 상대방 미디어 스트림 수신
+        pc.ontrack = (event) => {
+            console.log('상대방 미디어 스트림 수신:', event);
+            if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = event.streams[0];
+            }
+        };
+
+        // 이미 로컬 스트림이 있다면 트랙 추가
+        if (localStream) {
+            localStream.getTracks().forEach((track) => {
+                pc.addTrack(track, localStream);
+            });
+        }
+
+        setPeerConnection(pc);
+        return pc;
+    };
+
+    const startCall = async () => {
+        try {
+            console.log('getUserMedia 시작 (오디오 전용)');
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            console.log('로컬 미디어 스트림 획득:', stream);
+            setLocalStream(stream);
+            // video 태그가 있더라도 오디오 전용 스트림이므로 영상은 표시되지 않음
+            if (localVideoRef.current) {
+                localVideoRef.current.srcObject = stream;
+            }
+            let pc = peerConnection;
+            if (!pc) {
+                console.log('새 peerConnection 생성');
+                pc = await createPeerConnection();
+            }
+            // 로컬 스트림의 오디오 트랙을 PeerConnection에 추가
+            stream.getTracks().forEach((track) => {
+                console.log('트랙 추가:', track);
+                pc.addTrack(track, stream);
+            });
+
+            console.log('offer 생성 시작');
+            const offer = await pc.createOffer();
+            console.log('offer 생성 완료:', offer);
+            await pc.setLocalDescription(offer);
+            console.log('로컬 설명 설정 완료');
+            sendSignal({
+                type: 'offer',
+                offer: offer,
+                chatCode: chatCode
+            });
+        } catch (error) {
+            console.error('통화 시작 중 에러 발생:', error);
+        }
+    };
+
     return (
-        <Container>
-            <Header />
-            <Main>
-                <ContentWrapper>
-                    <Title>Welcome to the Video Chat Room</Title>
-                    <Subtitle>Join the conversation with your friends and colleagues.</Subtitle>
-                    <Input type="text" placeholder="Enter Room ID" />
-                    <ButtonRow>
-                        <button className="create-room">Create Room</button>
-                        <button className="join-room">Join Room</button>
-                    </ButtonRow>
-                </ContentWrapper>
-            </Main>
-            <Footer />
-        </Container>
+        <div>
+            <h2>1:1 화상채팅 (테스트 버전)</h2>
+            <div style={{ display: 'flex', gap: '10px' }}>
+                <video
+                    ref={localVideoRef}
+                    autoPlay
+                    muted
+                    style={{ width: '300px', border: '1px solid gray' }}
+                />
+                <video
+                    ref={remoteVideoRef}
+                    autoPlay
+                    style={{ width: '300px', border: '1px solid gray' }}
+                />
+            </div>
+            <button onClick={startCall} style={{ marginTop: '20px' }}>
+                통화 시작
+            </button>
+        </div>
     );
 };
 
-export default VideoChatPage;
+export default VideoChat;

@@ -34,7 +34,9 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/test/**",
                                 "/api/files/**",
-                                "/error"
+                                "/error",
+                                "/chatrooms/**",
+                                "/ws-chat/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()

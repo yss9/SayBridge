@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import CourseList from "./pages/CourseList";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
-import VideoChat from "./pages/VideoChat";
 import Course from "./pages/Course";
 import Introduce from "./pages/Introduce";
 import MyPage from "./pages/MyPage";
@@ -14,6 +13,10 @@ import ReviewTest from "./pages/ReviewTest";
 import {AuthProvider} from "./context/AuthContext";
 import CoursePost from "./pages/CoursePost";
 import FileTest from "./pages/FileTest";
+import ChatRoomPage from "./pages/ChatRoomPage";
+import CreateChatroom from "./pages/CreateChatroom";
+import VideoChatPage from "./pages/VideoChatPage";
+import VideoChat from "./pages/VideoChat";
 
 const App = () => {
     return (
@@ -26,7 +29,7 @@ const App = () => {
                     <Route path="/signin" element={<SignIn />} />
                     <Route path="/mypage" element={<MyPage />} />
                     <Route path="/teacherprofile" element={<TeacherProfile />}/>
-                    <Route path="/videochat" element={<VideoChat />} />
+                    <Route path="/videochat" element={<VideoChatPage />} />
                     <Route path="/course/:courseId" element={<Course />} />
                     <Route path="/teacher/:teacherId" element={<TeacherProfile />} />
                     <Route path="/posting/:courseId" element={<CoursePost/>}/>
@@ -35,6 +38,9 @@ const App = () => {
                     <Route path="/reviewTest" element={<ReviewTest/>}/>
                     <Route path="/requestTest" element={<RequestTest/>}/>
                     <Route path="/fileTest" element={<FileTest/>}/>
+                    <Route path="/create-chatroom" element={<CreateChatroom />} />
+                    <Route path="/chatroom/:chatCode" element={<ChatRoomPage />} />
+                    <Route path="/videotest" element={<VideoChat />} />
                 </Routes>
             </Router>
         </AuthProvider>
