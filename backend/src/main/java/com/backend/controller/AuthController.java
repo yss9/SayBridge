@@ -9,6 +9,7 @@ import com.backend.service.UserService;
 import com.backend.util.JwtTokenUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    @Value("${domain}")
+    private String domain;
 
     @Autowired
     private AuthService authService;
@@ -42,7 +46,7 @@ public class AuthController {
 
         ResponseCookie cookie = ResponseCookie.from("jwt", loginResponse.getToken())
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .sameSite("Strict")
                 .path("/")
                 .maxAge(jwtTokenUtil.getValidityInSeconds())
@@ -53,20 +57,20 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .sameSite("Strict")
                 .path("/")
-                .domain("localhost")
+                .domain(domain)
                 .maxAge(0)
                 .build();
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body("로그아웃 완료");
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok("로그아웃 완료");
     }
+
 
     @GetMapping("/email-exists")
     public ResponseEntity<Boolean> emailExists(@RequestParam String email) {

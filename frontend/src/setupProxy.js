@@ -4,7 +4,7 @@ module.exports = function (app) {
     app.use(
         '/api',
         createProxyMiddleware({
-            target: 'http://localhost:8080', // 백엔드 주소
+            target: process.env.REACT_APP_API_URL,
             changeOrigin: true,
         })
     );

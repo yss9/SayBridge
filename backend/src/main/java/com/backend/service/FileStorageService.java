@@ -36,9 +36,7 @@ public class FileStorageService {
         File file = convertMultipartFileToFile(multipartFile);
 
         String oldKey = user.getProfileImageUrl();
-        System.out.println("oldKey = " + oldKey);
         if (oldKey != null) {
-            System.out.println("oldKey = " + oldKey);
             s3Service.deleteFile(oldKey);
         }
 

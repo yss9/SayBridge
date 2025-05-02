@@ -37,7 +37,7 @@ const ChatRoomPage = () => {
             <Header />
             <Main>
                 <InnerWrapper>
-                    <ChatRoomTitle>채팅방: {chatCode}</ChatRoomTitle>
+                    <ChatRoomTitle>채팅방 코드 : {chatCode}</ChatRoomTitle>
                     {user ? (
                         <ChatRoom
                             chatCode={chatCode}

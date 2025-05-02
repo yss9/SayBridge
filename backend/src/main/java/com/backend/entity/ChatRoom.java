@@ -25,9 +25,6 @@ public class ChatRoom {
     @Column(nullable = false)
     private Integer currentParticipants = 0;
 
-    @Column(nullable = true)
-    private String videoChatUrl;
-
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

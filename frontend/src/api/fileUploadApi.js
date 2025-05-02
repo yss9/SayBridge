@@ -7,8 +7,7 @@ const uploadApi = {
         return apiClient.post('/files/profile', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-            },
-            withCredentials: true
+            }
         });
     },
     teacherProfileUpload: (file) => {
@@ -17,8 +16,7 @@ const uploadApi = {
         return apiClient.post('/files/teacher/profile', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-            },
-            withCredentials: true
+            }
         });
     },
     coursePostFileUpload: (coursePostId, file) => {
@@ -27,8 +25,7 @@ const uploadApi = {
         return apiClient.post(`/files/coursePost/${coursePostId}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-            },
-            withCredentials: true
+            }
         });
     },
     homeworkFileUpload: (file, coursePostId) => {
@@ -37,8 +34,7 @@ const uploadApi = {
         return apiClient.post(`/files/homework/${coursePostId}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-            },
-            withCredentials: true
+            }
         });
     }
 };

@@ -1,7 +1,6 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext} from 'react';
 import styled from 'styled-components';
 import {authApi} from "../api/authApi";
-import {userInfoApi} from "../api/userApi";
 import {useNavigate} from "react-router-dom";
 import {AuthContext} from "../context/AuthContext";
 
@@ -62,6 +61,11 @@ const Header = () => {
         navigate(`/teacher/${user.teacherId}`);
     };
 
+    const handleGoVideoChat = () => {
+        navigate(`/videochat`);
+    };
+
+
     const handleLogout = async () => {
         try {
                 await authApi.logout();
@@ -81,7 +85,7 @@ const Header = () => {
                     <>
                         <button onClick={handleGoHome}>Home</button>
                         <button onClick={handleGoMyPage}>My Page</button>
-
+                        <button onClick={handleGoVideoChat}>Video Chat</button>
                         {role === "TEACHER" && (
                             <button onClick={handleGoTeacherProfile}>Teacher Profile</button>
                         )}

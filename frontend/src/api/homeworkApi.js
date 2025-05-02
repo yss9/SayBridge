@@ -2,20 +2,20 @@ import apiClient from './index';
 
 const homeworkApi = {
     cancelHomeworkSubmission: (coursePostId) => {
-        return apiClient.delete(`/homework/${coursePostId}`, { withCredentials: true });
+        return apiClient.delete(`/homework/${coursePostId}`);
     },
 
     getStudentSubmissions: (postIds) => {
         const query = postIds.join(",");
-        return apiClient.get(`/homework/submissions?postIds=${query}`, { withCredentials: true });
+        return apiClient.get(`/homework/submissions?postIds=${query}`);
     },
 
     getPostSubmissions: (coursePostId) => {
-        return apiClient.get(`/homework/post/${coursePostId}/submissions`, { withCredentials: true });
+        return apiClient.get(`/homework/post/${coursePostId}/submissions`);
     },
 
     submitHomework: (coursePostId, fileUrl) => {
-        return apiClient.post(`/homework/submit/${coursePostId}`, { fileUrl }, { withCredentials: true });
+        return apiClient.post(`/homework/submit/${coursePostId}`, { fileUrl });
     }
 };
 

@@ -16,7 +16,8 @@ bower_components
 psd
 thumb
 sketch
-
+192.168.0.102+1-key.pem
+192.168.0.102+1.pem
 ### yarn ###
 # https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import VideoChat from "./VideoChat";
 
 const Container = styled.div`
     display: flex;
@@ -15,7 +16,6 @@ const Main = styled.main`
     background-color: #fff;
 `;
 
-/* 상단 영상 영역 */
 const TopVideoRow = styled.div`
     display: flex;
     gap: 1rem;
@@ -23,23 +23,7 @@ const TopVideoRow = styled.div`
     margin-bottom: 1rem;
 `;
 
-const VideoBox = styled.div`
-    flex: 1;
-    background-color: #f3f3f3;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-`;
 
-const VideoTitle = styled.div`
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-`;
-
-/* 중간 영역 전체 (채팅 + 파일) 고정 높이 */
 const MiddleWrapper = styled.div`
     display: flex;
     gap: 1rem;
@@ -47,7 +31,6 @@ const MiddleWrapper = styled.div`
     margin-bottom: 1rem;
 `;
 
-/* 채팅 영역 (왼쪽) */
 const ChatArea = styled.div`
     flex: 2;
     background-color: #f9f9f9;
@@ -58,14 +41,12 @@ const ChatArea = styled.div`
     flex-direction: column;
 `;
 
-/* 메시지 목록 영역 - 고정 높이 내에서 스크롤 */
 const MessageList = styled.div`
     flex: 1;
     overflow-y: auto;
     margin-bottom: 1rem;
 `;
 
-/* 개별 메시지 박스 */
 const MessageBox = styled.div`
     background-color: #fff;
     border: 1px solid #eee;
@@ -90,7 +71,6 @@ const MessageTime = styled.div`
     color: #666;
 `;
 
-/* 파일 목록 영역 (오른쪽) */
 const FileListArea = styled.div`
     flex: 1;
     background-color: #f9f9f9;
@@ -133,7 +113,6 @@ const FileButton = styled.button`
     }
 `;
 
-/* 하단 입력 영역 (고정 높이 60px) */
 const BottomInputRow = styled.div`
     display: flex;
     align-items: center;
@@ -172,7 +151,7 @@ const ChatRoom = ({ chatCode, userEmail, userName }) => {
 
     useEffect(() => {
         // WebSocket 연결 생성
-        const socket = new SockJS("http://localhost:8080/ws-chat");
+        const socket = new SockJS(process.env.REACT_APP_API_URL+"/ws-chat");
         const client = new Client({
             webSocketFactory: () => socket,
             debug: (str) => console.log(str),
@@ -237,21 +216,11 @@ const ChatRoom = ({ chatCode, userEmail, userName }) => {
     return (
         <Container>
             <Main>
-                {/* 상단 영상 영역 */}
                 <TopVideoRow>
-                    <VideoBox>
-                        <VideoTitle>Alice</VideoTitle>
-                        <div>Video Placeholder</div>
-                    </VideoBox>
-                    <VideoBox>
-                        <VideoTitle>You</VideoTitle>
-                        <div>Video Placeholder</div>
-                    </VideoBox>
+                    <VideoChat chatCode={chatCode} />
                 </TopVideoRow>
 
-                {/* 중간 영역: 채팅 + 파일 */}
                 <MiddleWrapper>
-                    {/* 채팅 영역 */}
                     <ChatArea>
                         <MessageList>
                             {messages.map((msg, index) => (
@@ -265,23 +234,11 @@ const ChatRoom = ({ chatCode, userEmail, userName }) => {
                                     <div>{msg.message}</div>
                                 </MessageBox>
                             ))}
-                            {/* 마지막 요소에 ref 추가 */}
                             <div ref={messageEndRef} />
                         </MessageList>
                     </ChatArea>
-
-                    {/* 파일 목록 영역 */}
-                    <FileListArea>
-                        <FileListHeader>Files</FileListHeader>
-                        <FileList>
-                            <FileItem>PDF - Request.pdf (1.2MB)</FileItem>
-                            <FileItem>PDF - Request2.pdf (1.4MB)</FileItem>
-                        </FileList>
-                        <FileButton>File</FileButton>
-                    </FileListArea>
                 </MiddleWrapper>
 
-                {/* 하단 메시지 입력 영역 */}
                 <BottomInputRow>
                     <BottomInput
                         placeholder="Enter Message"

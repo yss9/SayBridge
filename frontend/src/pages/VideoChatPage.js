@@ -97,11 +97,11 @@ const VideoChatPage = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
-    // "Create Room" 클릭 시 채팅방 생성 (최대 인원 5 고정)
     const handleCreateRoom = async () => {
         try {
-            const response = await axios.post("http://localhost:8080/chatrooms", null, {
+            const response = await axios.post(process.env.REACT_APP_API_URL+"/chatrooms", null, {
                 params: { maxParticipants: 5 },
+                withCredentials:true
             });
             const chatRoom = response.data;
             navigate(`/chatroom/${chatRoom.chatCode}`);
@@ -111,7 +111,6 @@ const VideoChatPage = () => {
         }
     };
 
-    // "Join Room" 클릭 시 입력한 Room ID로 이동
     const handleJoinRoom = () => {
         if (roomId.trim() === "") {
             setError("Room ID를 입력해주세요.");
@@ -133,7 +132,7 @@ const VideoChatPage = () => {
                         value={roomId}
                         onChange={(e) => {
                             setRoomId(e.target.value);
-                            setError(""); // 입력 시 에러 메시지 초기화
+                            setError("");
                         }}
                     />
                     <ButtonRow>
