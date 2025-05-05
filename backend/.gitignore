@@ -58,7 +58,7 @@ out/
 *.ipr
 *.iws
 .shelf
-
+**/resources/
 .settings/
 .classpath
 .project
