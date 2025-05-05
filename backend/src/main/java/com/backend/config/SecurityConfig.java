@@ -43,7 +43,8 @@ public class SecurityConfig {
                                 "/api/oauth2/**",
                                 "/api/auth/**",
                                 "/error",
-                                "/chatrooms/**"
+                                "/chatrooms/**",
+                                "/api/course"
                         ).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()

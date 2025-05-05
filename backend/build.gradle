@@ -59,6 +59,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
 
+
+
+
 }
 
 // querydsl generated 경로 설정
