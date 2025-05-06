@@ -8,19 +8,12 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await userInfoApi.userInfo();
-                setUser(response.data);
-            } catch (error) {
-                setUser(null);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUser();
+        userInfoApi
+            .userInfo()
+            .then(res => setUser(res.data))
+            .catch(() => setUser(null))
+            .finally(() => setLoading(false));
     }, []);
-
     return (
         <AuthContext.Provider value={{ user, setUser, loading }}>
             {children}

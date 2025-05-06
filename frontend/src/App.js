@@ -20,6 +20,7 @@ import ChatRoomPage from './pages/ChatRoomPage';
 import CreateChatroom from './pages/CreateChatroom';
 import VideoChat from './pages/VideoChat';
 import AdminUserPage from './pages/AdminUserPage';
+import WebRtcTest from "./pages/WebRTCTEST";
 
 function App() {
     return (
@@ -30,7 +31,7 @@ function App() {
                     <Route path="/" element={<Introduce />} />
                     <Route path="/signup" element={<SignUp />} />
                     <Route path="/signin" element={<SignIn />} />
-
+                    <Route path="/rtctest" element={<WebRtcTest/>}/>
                     {/* Protected Routes */}
                     <Route element={<PrivateRoute />}>
                         <Route path="/courselist" element={<CourseList />} />

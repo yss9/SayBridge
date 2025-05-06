@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {use, useContext} from 'react';
 import styled from 'styled-components';
 import {authApi} from "../api/authApi";
 import {useNavigate} from "react-router-dom";
@@ -44,7 +44,6 @@ const Header = () => {
     const { user, setUser } = useContext(AuthContext);
     const isLoggedIn = !!user;
     const role = user?.role || '';
-
     const handleGoHome = () =>{
         navigate('/');
     }
@@ -75,7 +74,6 @@ const Header = () => {
             console.error("로그아웃 실패:", error);
         }
     };
-
 
     return (
         <HeaderContainer>
