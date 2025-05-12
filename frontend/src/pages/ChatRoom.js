@@ -1,3 +1,4 @@
+// ChatRoom.jsx
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { Client } from "@stomp/stompjs";
@@ -7,35 +8,30 @@ import VideoChat from "./VideoChat";
 const Container = styled.div`
     display: flex;
     flex-direction: column;
-`;
-
-const Main = styled.main`
-    flex: 1;
-    padding: 20px;
-    background: #fff;
+    height: 70vh; 
+    overflow: hidden;
 `;
 
 const TopRow = styled.div`
-    display: flex;
-    gap: 1rem;
-    height: 35vh;
-    margin-bottom: 1rem;
+    flex: 0 0 35vh;
+    overflow: hidden;
 `;
 
 const ChatArea = styled.div`
-    flex: 2;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 1rem;
+    flex: 0 0 calc(100vh - 65vh);
     display: flex;
     flex-direction: column;
+    overflow: hidden;  
 `;
 
 const MessageList = styled.div`
     flex: 1;
-    overflow-y: auto;
-    margin-bottom: 1rem;
+    min-height: 0;   
+    overflow-y: auto;  
+    padding: 1rem;
+    background: #f9f9f9;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
 `;
 
 const MessageBox = styled.div`
@@ -61,12 +57,12 @@ const MessageTime = styled.div`
     color: #666;
 `;
 
-const BottomRow = styled.div`
+const InputRow = styled.div`
+    flex: 0 0 60px; 
     display: flex;
     align-items: center;
-    height: 60px;
+    padding: 0 1rem;
     background: #fff;
-    padding: 0 0.5rem;
 `;
 
 const Input = styled.input`
@@ -80,12 +76,14 @@ const SendButton = styled.button`
     background: #000;
     color: #fff;
     border: none;
+    margin-left: 0.5rem;
     padding: 0.75rem 1rem;
     font-weight: bold;
     cursor: pointer;
     border-radius: 4px;
-    margin-left: 0.5rem;
-    &:hover { background: #333; }
+    &:hover {
+        background: #333;
+    }
 `;
 
 export default function ChatRoom({ chatCode, userEmail, userName, isInitiator }) {
@@ -94,7 +92,6 @@ export default function ChatRoom({ chatCode, userEmail, userName, isInitiator })
     const [input, setInput] = useState("");
     const endRef = useRef(null);
 
-    // 채팅용 STOMP 연결
     useEffect(() => {
         const socket = new SockJS(process.env.REACT_APP_API_URL + "/ws-chat");
         const client = new Client({
@@ -110,7 +107,6 @@ export default function ChatRoom({ chatCode, userEmail, userName, isInitiator })
         return () => client.deactivate();
     }, [chatCode]);
 
-    // 메시지 전송
     const sendMsg = () => {
         if (!input.trim() || !stompClient?.connected) return;
         const dto = {
@@ -118,7 +114,7 @@ export default function ChatRoom({ chatCode, userEmail, userName, isInitiator })
             senderEmail: userEmail,
             senderName: userName,
             message: input,
-            createdAt: new Date(),
+            createdAt: new Date().toISOString(),
         };
         stompClient.publish({
             destination: "/app/chat.sendMessage",
@@ -134,40 +130,38 @@ export default function ChatRoom({ chatCode, userEmail, userName, isInitiator })
 
     return (
         <Container>
-            <Main>
-                <TopRow>
-                    <VideoChat
-                        chatCode={chatCode}
-                        currentUser={{ name: userName }}
-                        isInitiator={isInitiator}
+            <TopRow>
+                <VideoChat
+                    chatCode={chatCode}
+                    currentUser={{ name: userName }}
+                    isInitiator={isInitiator}
+                />
+            </TopRow>
+            <ChatArea>
+                <MessageList>
+                    {messages.map((msg, idx) => (
+                        <MessageBox key={idx}>
+                            <MessageHeader>
+                                <MessageSender>{msg.senderName}</MessageSender>
+                                <MessageTime>
+                                    {new Date(msg.createdAt).toLocaleTimeString()}
+                                </MessageTime>
+                            </MessageHeader>
+                            <div>{msg.message}</div>
+                        </MessageBox>
+                    ))}
+                    <div ref={endRef} />
+                </MessageList>
+                <InputRow>
+                    <Input
+                        placeholder="Enter Message"
+                        value={input}
+                        onChange={e => setInput(e.target.value)}
+                        onKeyPress={e => e.key === "Enter" && sendMsg()}
                     />
-                </TopRow>
-                <ChatArea>
-                    <MessageList>
-                        {messages.map((msg, idx) => (
-                            <MessageBox key={idx}>
-                                <MessageHeader>
-                                    <MessageSender>{msg.senderName}</MessageSender>
-                                    <MessageTime>
-                                        {new Date(msg.createdAt).toLocaleTimeString()}
-                                    </MessageTime>
-                                </MessageHeader>
-                                <div>{msg.message}</div>
-                            </MessageBox>
-                        ))}
-                        <div ref={endRef} />
-                    </MessageList>
-                    <BottomRow>
-                        <Input
-                            placeholder="Enter Message"
-                            value={input}
-                            onChange={e => setInput(e.target.value)}
-                            onKeyPress={e => e.key === "Enter" && sendMsg()}
-                        />
-                        <SendButton onClick={sendMsg}>Send</SendButton>
-                    </BottomRow>
-                </ChatArea>
-            </Main>
+                    <SendButton onClick={sendMsg}>Send</SendButton>
+                </InputRow>
+            </ChatArea>
         </Container>
     );
 }
