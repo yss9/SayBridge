@@ -16,7 +16,6 @@ import TeacherSubmissionsModal from "./TeacherSubmissionsModal";
 import { uploadApi } from "../api/fileUploadApi";
 import { homeworkApi } from "../api/homeworkApi";
 
-// Styled Components
 const Container = styled.div`
     display: flex;
     flex-direction: column;
@@ -175,7 +174,7 @@ const PostContent = styled.div`
     font-size: 1rem;
     margin-bottom: 12px;
     color: #333;
-    white-space: pre-line; /* 줄바꿈 문자를 유지하여 출력 */
+    white-space: pre-line; 
 `;
 
 const ActionButton = styled.button`

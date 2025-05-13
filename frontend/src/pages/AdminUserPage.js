@@ -1,7 +1,6 @@
-// src/pages/AdminUserPage.jsx
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import adminApi from '../api/adminApi';  // adminApi로 변경
+import adminApi from '../api/adminApi';
 
 const Container = styled.div`padding: 2rem;`;
 const Title = styled.h1`margin-bottom: 1rem;`;

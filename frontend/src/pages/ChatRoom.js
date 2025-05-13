@@ -1,4 +1,3 @@
-// ChatRoom.jsx
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { Client } from "@stomp/stompjs";
