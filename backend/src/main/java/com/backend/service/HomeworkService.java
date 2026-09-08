@@ -1,6 +1,7 @@
 package com.backend.service;
 
 import com.backend.dto.HomeworkSubmissionDto;
+import com.backend.dto.HomeworkAttachmentProjection;
 import com.backend.entity.CoursePost;
 import com.backend.entity.Homework;
 import com.backend.entity.User;
@@ -76,14 +77,17 @@ public class HomeworkService {
 
 
     public Map<Long, String> getStudentSubmissionsMap(List<Long> postIds, User currentUser) {
-        Map<Long, String> result = new HashMap<>();
-        for (Long postId : postIds) {
-            Homework hw = getStudentSubmission(postId, currentUser);
-            if (hw != null) {
-                result.put(postId, hw.getAttachmentUrl());
-            }
+        if (postIds == null || postIds.isEmpty()) {
+            return Collections.emptyMap();
         }
-        return result;
+
+        return homeworkRepository.findSubmissionAttachments(currentUser.getId(), postIds).stream()
+                .collect(Collectors.toMap(
+                        HomeworkAttachmentProjection::getCoursePostId,
+                        HomeworkAttachmentProjection::getAttachmentUrl,
+                        (first, ignored) -> first,
+                        LinkedHashMap::new
+                ));
     }
 
     public List<HomeworkSubmissionDto> getPostSubmissionsDto(Long coursePostId) {
