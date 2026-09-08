@@ -4,6 +4,7 @@ import com.backend.entity.CourseEnrollment;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CourseEnrollmentRepository extends CrudRepository<CourseEnrollment,Long> {
 
@@ -11,5 +12,5 @@ public interface CourseEnrollmentRepository extends CrudRepository<CourseEnrollm
     List<CourseEnrollment> findByCourseId(Long courseId);
     boolean existsByCourseIdAndStudentId(Long courseId, Long studentId);
     void deleteByCourseIdAndStudentId(Long courseId, Long studentId);
-    Long id(Long id);
+    Optional<CourseEnrollment> findByCourseIdAndStudentId(Long courseId, Long studentId);
 }

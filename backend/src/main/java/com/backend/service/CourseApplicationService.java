@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,10 +54,12 @@ public class CourseApplicationService {
 
     @Transactional
     public void accept(Long courseApplicationId) {
-        CourseApplication courseApplication = courseApplicationRepository.findById(courseApplicationId).orElseThrow();
+        CourseApplication courseApplication = courseApplicationRepository.findById(courseApplicationId).orElseThrow(NoSuchElementException::new);
         CourseEnrollment courseEnrollment = new CourseEnrollment();
         courseEnrollment.setCourse(courseApplication.getCourse());
         courseEnrollment.setStudent(courseApplication.getStudent());
+        Course course = courseApplication.getCourse();
+        course.increaseCurrentStudents();
         courseEnrollmentRepository.save(courseEnrollment);
         courseApplicationRepository.delete(courseApplication);
     }

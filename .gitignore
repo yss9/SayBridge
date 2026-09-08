@@ -1,2 +1,11 @@
 .idea
 .DS_Store
+
+# Generated frontend output
+frontend/build/
+
+# Local TLS certificates and private keys
+frontend/*.pem
+
+# Local repository snapshots
+repopack-output.txt

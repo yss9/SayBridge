@@ -368,7 +368,9 @@ const CourseList = () => {
                             <CoursesGrid>
                                 {searchCourses.map(course => (
                                     <CourseCard key={course.id}>
-                                        <CourseTitle>{course.title}</CourseTitle>
+                                        <Link to={`/course/${course.id}`} style={{ textDecoration: 'none' }}>
+                                            <CourseTitle>{course.title}</CourseTitle>
+                                        </Link>
                                         <CourseInfo>
                                             <strong>Teacher:</strong>
                                             <a href={`/teacher/${course.teacherId}`} style={{ textDecoration: 'none', color: 'blue' }}>

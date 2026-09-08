@@ -190,18 +190,18 @@ const SignInPage = () => {
     const [password, setPassword] = useState('');
     const { user, setUser } = useContext(AuthContext);
 
-    const handleNaverLogin = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+    const BASE_URL = process.env.REACT_APP_API_URL;
 
+    const handleNaverLogin = () => {
+        window.location.href = `${BASE_URL}/oauth2/authorization/naver`;
     };
 
     const handleKakaoLogin = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
-
+        window.location.href = `${BASE_URL}/oauth2/authorization/kakao`;
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        window.location.href = `${BASE_URL}/oauth2/authorization/google`;
     };
 
     const handleLoginSubmit = async (e) => {

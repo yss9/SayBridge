@@ -47,5 +47,18 @@ public class Course {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void increaseCurrentStudents() {
+        if (currentStudents >= maxStudents) {
+            throw new IllegalStateException(
+                    "정원 초과: current=" + currentStudents + ", max=" + maxStudents);
+        }
+        currentStudents++;
+    }
 
+    public void decreaseCurrentStudents() {
+        if (currentStudents == 0) {
+            throw new IllegalStateException("수강생이 0명일 때는 뺄 수 없습니다.");
+        }
+        currentStudents--;
+    }
 }

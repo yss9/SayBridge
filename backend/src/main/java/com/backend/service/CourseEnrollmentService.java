@@ -1,6 +1,8 @@
 package com.backend.service;
 
 import com.backend.dto.CourseEnrollmentListDto;
+import com.backend.entity.Course;
+import com.backend.entity.CourseEnrollment;
 import com.backend.entity.User;
 import com.backend.repository.CourseEnrollmentRepository;
 import jakarta.transaction.Transactional;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,12 +39,22 @@ public class CourseEnrollmentService {
 
     @Transactional
     public void withdrawCourse(Long courseId, User student) {
+        CourseEnrollment courseEnrollment = courseEnrollmentRepository.findByCourseIdAndStudentId(courseId, student.getId())
+                .orElseThrow(NoSuchElementException::new);
+        Course course = courseEnrollment.getCourse();
+        course.decreaseCurrentStudents();
         courseEnrollmentRepository.deleteByCourseIdAndStudentId(courseId, student.getId());
     }
 
     @Transactional
     public void expelStudent(Long enrollmentId) {
-        courseEnrollmentRepository.deleteById(enrollmentId);
+        CourseEnrollment enrollment =
+                courseEnrollmentRepository.findById(enrollmentId)
+                        .orElseThrow(NoSuchElementException::new);
+
+        Course course = enrollment.getCourse();
+        course.decreaseCurrentStudents();
+        courseEnrollmentRepository.delete(enrollment);
     }
 
 
